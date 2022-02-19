@@ -6,7 +6,8 @@ package com.practise.demo.response;
  * 异常抛出常量管理
  */
 public enum EnumCode {
-    Success(0, "success");
+    SUCCESS(0, "success"),
+    SYSTEM_ERROR(5500, "系统错误");
 
     EnumCode() {
     }

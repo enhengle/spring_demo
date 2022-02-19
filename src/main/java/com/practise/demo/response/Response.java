@@ -29,11 +29,15 @@ public class Response<T> {
     }
 
     public static <T> Response<T> ok(T date) {
-        return new Response<>(date);
+        return new Response<>(EnumCode.SUCCESS.getMsg(), EnumCode.SUCCESS.getCode(), date);
     }
 
     public static <T> Response<T> error(int code, String message) {
         return new Response<T>(message, code);
+    }
+
+    public static <T> Response<T> error(EnumCode enumCode) {
+        return new Response<T>(enumCode.getMsg(), enumCode.getCode());
     }
 
     public String getMessage() {
