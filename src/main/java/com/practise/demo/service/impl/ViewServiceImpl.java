@@ -1,6 +1,6 @@
 package com.practise.demo.service.impl;
 
-import com.practise.demo.mapper.manager.ViewMapper;
+import com.practise.demo.repository.manager.ViewRepository;
 import com.practise.demo.pojo.manager.View;
 import com.practise.demo.service.ViewService;
 import org.springframework.stereotype.Service;
@@ -16,9 +16,9 @@ import java.util.List;
 public class ViewServiceImpl implements ViewService {
 
     @Resource
-    private ViewMapper viewMapper;
+    private ViewRepository viewRepository;
 
     public List<View> findList(int state) {
-        return viewMapper.findList(state);
+        return viewRepository.findList(state);
     }
 }

@@ -1,15 +1,18 @@
 package com.practise.demo.pojo.manager;
 
-import com.baomidou.mybatisplus.annotation.TableName;
+import javax.persistence.*;
 
 //此处table_name请置换成表名
-@TableName(value = "table_name")
+@Entity
+@Table(name = "table_name", schema = "manager")
 public class View {
     private Long id;
     private String appId;
     private Integer state;
     private String createdAt;
 
+    @Id
+    @Column(name = "id")
     public Long getId() {
         return id;
     }
@@ -18,6 +21,8 @@ public class View {
         this.id = id;
     }
 
+    @Basic
+    @Column(name = "app_id")
     public String getAppId() {
         return appId;
     }
@@ -26,6 +31,8 @@ public class View {
         this.appId = appId;
     }
 
+    @Basic
+    @Column(name = "state")
     public Integer getState() {
         return state;
     }
@@ -34,6 +41,8 @@ public class View {
         this.state = state;
     }
 
+    @Basic
+    @Column(name = "created_at")
     public String getCreatedAt() {
         return createdAt;
     }
