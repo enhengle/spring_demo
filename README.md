@@ -2,9 +2,10 @@
 
 ### 环境
 ```$xslt
-window11+jdk8+idea
+环境：window11 + jdk8
+开发软件：idea
 ```
 ### 功能说明
 ```$xslt
-日期常用方法
+redis简单操作：string+list
 ```
