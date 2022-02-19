@@ -1,10 +1,13 @@
 #¶Ë¿Ú
 server:
   port: 1234
-
-spring:
-  redis:
-    host: localhost
-    port: 6379
-    password: 123456
-    database: 13
+es:
+  config:
+    cluster-name: elasticsearch
+    cluster-nodes: http://localhost:9200
+    username: elastic
+    password: elastic
+    connect-timeout: 5000
+    socket-timeout: 30000
+    connection-request-timeout: 30000
+  indices: test
