@@ -1,13 +1,21 @@
 #端口
 server:
   port: 1234
-es:
-  config:
-    cluster-name: elasticsearch
-    cluster-nodes: http://localhost:9200
-    username: elastic
-    password: elastic
-    connect-timeout: 5000
-    socket-timeout: 30000
-    connection-request-timeout: 30000
-  indices: test
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: test-consumer-group
+      #key的解码方式
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      #value的解码方式
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      #在/usr/local/etc/kafka/consumer.properties中有配置
+    producer:
+      bootstrap-servers: localhost:9092
+      batch-size: 16
+      retries: 0
+      buffer-memory: 33554432
+      #key序列化方式
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
