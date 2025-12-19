@@ -16,3 +16,7 @@
 ```$xslt
 kafka简单功能
 ```
+### application.yml 
+```$xslt
+编码：GBK
+``` 
