@@ -20,3 +20,24 @@ kafka简单功能
 ```$xslt
 编码：GBK
 ``` 
+
+### 进阶功能
+```angular2html
+· kafka定时发送信息 - 不区分 Kafka分区
+· kafka定时发送信息 - 区分 Kafka分区
+· 不区分 Kafka分区 消费
+· 手动提交ACK
+· 区分 Kafka分区 消费
+```
+
+
+### 定时任务讲解
+```angular2html
+1. 添加定时任务开启开关 ： @EnableScheduling
+2. 创建定时任务 SendKafkaDataScheduled
+```
+
+### 踩坑史
+```angular2html
+当手动提交ack和不手动提交ack需要写在一套代码时，不可以用默认的spring.kafka配置，这样会异常。
+```

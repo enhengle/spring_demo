@@ -1,21 +1,24 @@
-#¶Ë¿Ú
+# ç«¯å£
 server:
   port: 1234
 spring:
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: 10.185.210.112:9092
     consumer:
-      group-id: test-consumer-group
-      #keyµÄ½âÂë·½Ê½
+#      group-id: test-consumer-group
+      # keyçš„è§£ç æ–¹å¼
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      #valueµÄ½âÂë·½Ê½
+      # valueçš„è§£ç æ–¹å¼
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      #ÔÚ/usr/local/etc/kafka/consumer.propertiesÖĞÓĞÅäÖÃ
+#      enable-auto-commit: false
+#      auto-offset-reset: latest
     producer:
-      bootstrap-servers: localhost:9092
+      bootstrap-servers: 10.185.210.112:9092
       batch-size: 16
       retries: 0
       buffer-memory: 33554432
-      #keyĞòÁĞ»¯·½Ê½
+      # keyåºåˆ—åŒ–æ–¹å¼
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+#    listener:
+#      ack-mode: manual
