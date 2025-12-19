@@ -3,7 +3,7 @@ server:
   port: 1234
 spring:
   kafka:
-    bootstrap-servers: 10.185.210.112:9092
+    bootstrap-servers: localhost:9092
     consumer:
 #      group-id: test-consumer-group
       # key的解码方式
@@ -13,7 +13,7 @@ spring:
 #      enable-auto-commit: false
 #      auto-offset-reset: latest
     producer:
-      bootstrap-servers: 10.185.210.112:9092
+      bootstrap-servers: localhost:9092
       batch-size: 16
       retries: 0
       buffer-memory: 33554432
