@@ -2,23 +2,47 @@
 server:
   port: 1234
 spring:
-  kafka:
+#  kafka:
+#    bootstrap-servers: localhost:9092
+#    consumer:
+##      group-id: test-consumer-group
+#      # key的解码方式
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      # value的解码方式
+#      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+##      enable-auto-commit: false
+##      auto-offset-reset: latest
+#    producer:
+#      bootstrap-servers: localhost:9092
+#      batch-size: 16
+#      retries: 0
+#      buffer-memory: 33554432
+#      # key序列化方式
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+#    listener:
+#      ack-mode: manual
+  kafka-cluster1:
     bootstrap-servers: localhost:9092
     consumer:
-#      group-id: test-consumer-group
+      #      group-id: test-consumer-group
       # key的解码方式
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       # value的解码方式
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-#      enable-auto-commit: false
-#      auto-offset-reset: latest
-    producer:
-      bootstrap-servers: localhost:9092
-      batch-size: 16
-      retries: 0
-      buffer-memory: 33554432
-      # key序列化方式
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
-#    listener:
-#      ack-mode: manual
+      auto-commit: # 自动提交
+        consumer:
+          enable-auto-commit: true
+          auto-offset-reset: latest
+      manual-commit: # 手动提交
+        consumer:
+          enable-auto-commit: false
+          auto-offset-reset: latest
+      producer:
+        bootstrap-servers: localhost:9092
+        batch-size: 16
+        retries: 0
+        buffer-memory: 33554432
+        # key序列化方式
+        key-serializer: org.apache.kafka.common.serialization.StringSerializer
+        value-serializer: org.apache.kafka.common.serialization.StringSerializer

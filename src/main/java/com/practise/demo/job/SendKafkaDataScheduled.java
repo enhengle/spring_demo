@@ -42,9 +42,9 @@ public class SendKafkaDataScheduled {
 
     @Scheduled(fixedRate = 5000) // 每5秒执行一次
     public void sendKafkaDataToPartitionedOne() {
-        if (sendSwitch) {
-            producer.send(defaultPartition, null);
-        }
+//        if (sendSwitch) {
+//            producer.send(defaultPartition, null);
+//        }
     }
 
 }
