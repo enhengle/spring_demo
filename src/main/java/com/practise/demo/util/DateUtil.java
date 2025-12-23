@@ -8,32 +8,32 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
+ * 日期处理工具类
+ * 
  * @author lingwang
  * @date 2021/3/15 20:14
- * 日期处理
  */
 public class DateUtil {
 
-    private static Logger logger = LoggerFactory.getLogger(DateUtil.class);
-
+    private static final Logger logger = LoggerFactory.getLogger(DateUtil.class);
 
     /**
      * 获取当前时间的前30天
      *
-     * @return
+     * @return 日期字符串，格式：yyyy-MM-dd
      */
-    public final static String getDayMonthEnd() {
+    public static String getDayMonthEnd() {
         try {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
             Date date = new Date();
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(date);
             calendar.add(Calendar.DATE, -30);
-            String endDate = format.format(calendar.getTime());
-            return endDate;
+            return format.format(calendar.getTime());
         } catch (Exception e) {
-            logger.error("日期转换错误  " + e.getMessage());
+            logger.error("日期转换错误: {}", e.getMessage(), e);
+            return null;
         }
-        return null;
     }
 }
+

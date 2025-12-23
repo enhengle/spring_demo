@@ -1,0 +1,22 @@
+# 测试环境配置
+spring:
+  datasource:
+    url: jdbc:mysql://test-db-server:3306/demo_test?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: ${DB_USERNAME:test_user}
+    password: ${DB_PASSWORD:test_password}
+
+server:
+  port: ${SERVER_PORT:1234}
+
+logging:
+  level:
+    root: INFO
+    com.practise.demo: INFO
+
+# Apollo配置（测试环境）
+# apollo:
+#   meta: http://test-apollo-server:8080
+#   bootstrap:
+#     enabled: true
+#     namespaces: application,test-config
+
