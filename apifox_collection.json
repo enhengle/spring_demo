@@ -1,0 +1,404 @@
+{
+  "info": {
+    "name": "Spark API 接口集合",
+    "description": "Spring Boot Spark 项目 API 接口测试集合",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "健康检查",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:1234/api/spark/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "1234",
+          "path": ["api", "spark", "health"]
+        }
+      }
+    },
+    {
+      "name": "读取 CSV 文件",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:1234/api/spark/read/csv?filePath=test-data/test.csv&hasHeader=true",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "1234",
+          "path": ["api", "spark", "read", "csv"],
+          "query": [
+            {
+              "key": "filePath",
+              "value": "test-data/test.csv"
+            },
+            {
+              "key": "hasHeader",
+              "value": "true"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "读取 JSON 文件",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:1234/api/spark/read/json?filePath=test-data/test.json",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "1234",
+          "path": ["api", "spark", "read", "json"],
+          "query": [
+            {
+              "key": "filePath",
+              "value": "test-data/test.json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "通过 SQL 创建临时视图（从 CSV）",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sql\": \"CREATE TEMPORARY VIEW users AS SELECT * FROM csv.`test-data/test.csv` OPTIONS (header \\\"true\\\", inferSchema \\\"true\\\")\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:1234/api/spark/view/create-by-sql",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "1234",
+          "path": ["api", "spark", "view", "create-by-sql"]
+        }
+      }
+    },
+    {
+      "name": "通过 SQL 创建临时视图（从 JSON）",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sql\": \"CREATE TEMPORARY VIEW users AS SELECT * FROM json.`test-data/test.json`\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:1234/api/spark/view/create-by-sql",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "1234",
+          "path": ["api", "spark", "view", "create-by-sql"]
+        }
+      }
+    },
+    {
+      "name": "通过 SQL 创建临时视图（从现有视图）",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sql\": \"CREATE TEMPORARY VIEW young_users AS SELECT name, age FROM users WHERE age < 30\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:1234/api/spark/view/create-by-sql",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "1234",
+          "path": ["api", "spark", "view", "create-by-sql"]
+        }
+      }
+    },
+    {
+      "name": "删除临时视图",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:1234/api/spark/view/users",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "1234",
+          "path": ["api", "spark", "view", "users"]
+        }
+      }
+    },
+    {
+      "name": "检查临时视图是否存在",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:1234/api/spark/view/users/exists",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "1234",
+          "path": ["api", "spark", "view", "users", "exists"]
+        }
+      }
+    },
+    {
+      "name": "列出所有临时视图",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:1234/api/spark/view/list",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "1234",
+          "path": ["api", "spark", "view", "list"]
+        }
+      }
+    },
+    {
+      "name": "获取视图 Schema",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:1234/api/spark/view/users/schema",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "1234",
+          "path": ["api", "spark", "view", "users", "schema"]
+        }
+      }
+    },
+    {
+      "name": "预览视图数据",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:1234/api/spark/view/users/preview?limit=10",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "1234",
+          "path": ["api", "spark", "view", "users", "preview"],
+          "query": [
+            {
+              "key": "limit",
+              "value": "10"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "校验 SQL 语法",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sql\": \"SELECT * FROM users WHERE age > 25\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:1234/api/spark/sql/validate",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "1234",
+          "path": ["api", "spark", "sql", "validate"]
+        }
+      }
+    },
+    {
+      "name": "解析 SELECT SQL",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sql\": \"SELECT name, age FROM users WHERE age > 25\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:1234/api/spark/sql/parse",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "1234",
+          "path": ["api", "spark", "sql", "parse"]
+        }
+      }
+    },
+    {
+      "name": "执行 SQL 查询（POST）",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sql\": \"SELECT * FROM users WHERE age > 25 ORDER BY age DESC\",\n  \"limit\": 10\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:1234/api/spark/sql/execute",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "1234",
+          "path": ["api", "spark", "sql", "execute"]
+        }
+      }
+    },
+    {
+      "name": "执行 SQL 查询（GET）",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:1234/api/spark/sql/execute?sql=SELECT * FROM users&limit=10",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "1234",
+          "path": ["api", "spark", "sql", "execute"],
+          "query": [
+            {
+              "key": "sql",
+              "value": "SELECT * FROM users"
+            },
+            {
+              "key": "limit",
+              "value": "10"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

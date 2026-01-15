@@ -1,21 +1,5 @@
-#端口
+# Spark 閰嶇疆
 server:
   port: 1234
-spring:
-  kafka:
-    bootstrap-servers: localhost:9092
-    consumer:
-      group-id: test-consumer-group
-      #key的解码方式
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      #value的解码方式
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      #在/usr/local/etc/kafka/consumer.properties中有配置
-    producer:
-      bootstrap-servers: localhost:9092
-      batch-size: 16
-      retries: 0
-      buffer-memory: 33554432
-      #key序列化方式
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+# Spark 閰嶇疆閫氳繃浠ｇ爜璁剧疆锛屾棤闇�鍦ㄦ閰嶇疆
