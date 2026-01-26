@@ -325,6 +325,99 @@ public class SparkUtilsTest {
         }
     }
 
+    @Test
+    @Order(16)
+    @DisplayName("测试 CSV 转 INSERT 语句（单条模式）")
+    void testCsvToInsertStatements() {
+        List<String> statements = SparkUtils.csvToInsertStatements(
+            TEST_DATA_DIR + "/test.csv", "users", true, null);
+        
+        assertNotNull(statements);
+        assertTrue(statements.size() > 0);
+        
+        String firstStatement = statements.get(0);
+        assertTrue(firstStatement.startsWith("INSERT INTO users"));
+        assertTrue(firstStatement.contains("VALUES"));
+    }
+
+    @Test
+    @Order(17)
+    @DisplayName("测试 CSV 转 INSERT 语句（批量模式）")
+    void testCsvToInsertStatementsBatch() {
+        List<String> statements = SparkUtils.csvToInsertStatements(
+            TEST_DATA_DIR + "/test.csv", "users", true, 2);
+        
+        assertNotNull(statements);
+        assertTrue(statements.size() > 0);
+        
+        String firstStatement = statements.get(0);
+        assertTrue(firstStatement.startsWith("INSERT INTO users"));
+    }
+
+    @Test
+    @Order(18)
+    @DisplayName("测试 CSV 转 REPLACE 语句")
+    void testCsvToReplaceStatements() {
+        List<String> statements = SparkUtils.csvToReplaceStatements(
+            TEST_DATA_DIR + "/test.csv", "users", true, null);
+        
+        assertNotNull(statements);
+        assertTrue(statements.size() > 0);
+        
+        String firstStatement = statements.get(0);
+        assertTrue(firstStatement.startsWith("REPLACE INTO users"));
+    }
+
+    @Test
+    @Order(19)
+    @DisplayName("测试 CSV 转 SQL 并保存到文件")
+    void testCsvToSqlFile() throws IOException {
+        String outputFile = TEST_OUTPUT_DIR + "/test_insert.sql";
+        
+        int count = SparkUtils.csvToSqlFile(
+            TEST_DATA_DIR + "/test.csv", "users", true, 
+            outputFile, null, "INSERT");
+        
+        assertTrue(count > 0);
+        
+        File file = new File(outputFile);
+        assertTrue(file.exists());
+        assertTrue(file.length() > 0);
+        
+        String content = new String(Files.readAllBytes(Paths.get(outputFile)));
+        assertTrue(content.contains("INSERT INTO users"));
+    }
+
+    @Test
+    @Order(20)
+    @DisplayName("测试 Dataset 转 INSERT 语句")
+    void testDatasetToInsertStatements() {
+        Dataset<Row> df = SparkUtils.readCsv(TEST_DATA_DIR + "/test.csv", true);
+        
+        List<String> statements = SparkUtils.datasetToInsertStatements(df, "users", null);
+        
+        assertNotNull(statements);
+        assertTrue(statements.size() > 0);
+        
+        String firstStatement = statements.get(0);
+        assertTrue(firstStatement.startsWith("INSERT INTO users"));
+    }
+
+    @Test
+    @Order(21)
+    @DisplayName("测试 Dataset 转 REPLACE 语句")
+    void testDatasetToReplaceStatements() {
+        Dataset<Row> df = SparkUtils.readCsv(TEST_DATA_DIR + "/test.csv", true);
+        
+        List<String> statements = SparkUtils.datasetToReplaceStatements(df, "users", null);
+        
+        assertNotNull(statements);
+        assertTrue(statements.size() > 0);
+        
+        String firstStatement = statements.get(0);
+        assertTrue(firstStatement.startsWith("REPLACE INTO users"));
+    }
+
     /**
      * 删除目录（递归）
      */

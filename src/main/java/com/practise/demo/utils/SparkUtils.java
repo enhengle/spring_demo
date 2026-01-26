@@ -1101,4 +1101,287 @@ public class SparkUtils {
         SparkSession spark = getSparkSession();
         return spark.read().parquet(filePath);
     }
+
+    // ==================== CSV 转 SQL 语句功能 ====================
+
+    /**
+     * 将 CSV 文件转换为 INSERT 语句
+     *
+     * @param csvFilePath CSV 文件路径
+     * @param tableName 目标表名
+     * @param hasHeader 是否包含表头
+     * @param batchSize 批量生成大小（每批生成多少条INSERT语句）
+     * @return INSERT 语句列表
+     */
+    public static List<String> csvToInsertStatements(String csvFilePath, String tableName, 
+                                                     boolean hasHeader, Integer batchSize) {
+        return csvToSqlStatements(csvFilePath, tableName, hasHeader, batchSize, "INSERT");
+    }
+
+    /**
+     * 将 CSV 文件转换为 REPLACE 语句
+     *
+     * @param csvFilePath CSV 文件路径
+     * @param tableName 目标表名
+     * @param hasHeader 是否包含表头
+     * @param batchSize 批量生成大小（每批生成多少条REPLACE语句）
+     * @return REPLACE 语句列表
+     */
+    public static List<String> csvToReplaceStatements(String csvFilePath, String tableName, 
+                                                       boolean hasHeader, Integer batchSize) {
+        return csvToSqlStatements(csvFilePath, tableName, hasHeader, batchSize, "REPLACE");
+    }
+
+    /**
+     * 将 CSV 文件转换为 SQL 语句（INSERT 或 REPLACE）
+     *
+     * @param csvFilePath CSV 文件路径
+     * @param tableName 目标表名
+     * @param hasHeader 是否包含表头
+     * @param batchSize 批量生成大小（null 或 0 表示不批量，每条数据一个语句）
+     * @param sqlType SQL 类型：INSERT 或 REPLACE
+     * @return SQL 语句列表
+     */
+    public static List<String> csvToSqlStatements(String csvFilePath, String tableName, 
+                                                  boolean hasHeader, Integer batchSize, String sqlType) {
+        List<String> sqlStatements = new ArrayList<>();
+        
+        try {
+            // 读取 CSV 文件
+            Dataset<Row> df = readCsv(csvFilePath, hasHeader);
+            String[] columns = df.columns();
+            
+            // 收集所有数据
+            Row[] rows = (Row[]) df.collect();
+            
+            if (rows.length == 0) {
+                return sqlStatements;
+            }
+            
+            // 构建列名部分
+            String columnsPart = String.join(", ", columns);
+            
+            // 判断是否批量生成
+            boolean useBatch = batchSize != null && batchSize > 0;
+            int actualBatchSize = useBatch ? batchSize : 1;
+            
+            StringBuilder currentBatch = new StringBuilder();
+            int currentBatchCount = 0;
+            
+            for (Row row : rows) {
+                // 构建 VALUES 部分
+                StringBuilder values = new StringBuilder("(");
+                for (int i = 0; i < columns.length; i++) {
+                    if (i > 0) {
+                        values.append(", ");
+                    }
+                    Object value = row.get(i);
+                    values.append(formatSqlValue(value));
+                }
+                values.append(")");
+                
+                if (useBatch) {
+                    // 批量模式
+                    if (currentBatchCount == 0) {
+                        // 开始新的批量语句
+                        currentBatch.append(sqlType).append(" INTO ").append(tableName)
+                                .append(" (").append(columnsPart).append(") VALUES ");
+                    } else {
+                        currentBatch.append(", ");
+                    }
+                    currentBatch.append(values);
+                    currentBatchCount++;
+                    
+                    // 达到批量大小时，完成当前批量语句
+                    if (currentBatchCount >= actualBatchSize) {
+                        sqlStatements.add(currentBatch.toString());
+                        currentBatch = new StringBuilder();
+                        currentBatchCount = 0;
+                    }
+                } else {
+                    // 单条模式
+                    String sql = sqlType + " INTO " + tableName + " (" + columnsPart + ") VALUES " + values;
+                    sqlStatements.add(sql);
+                }
+            }
+            
+            // 处理剩余的批量数据
+            if (useBatch && currentBatchCount > 0) {
+                sqlStatements.add(currentBatch.toString());
+            }
+            
+        } catch (Exception e) {
+            throw new RuntimeException("转换 CSV 到 SQL 语句失败: " + e.getMessage(), e);
+        }
+        
+        return sqlStatements;
+    }
+
+    /**
+     * 将 CSV 文件转换为 SQL 语句并保存到文件
+     *
+     * @param csvFilePath CSV 文件路径
+     * @param tableName 目标表名
+     * @param hasHeader 是否包含表头
+     * @param outputFilePath 输出 SQL 文件路径
+     * @param batchSize 批量生成大小
+     * @param sqlType SQL 类型：INSERT 或 REPLACE
+     * @return 生成的 SQL 语句数量
+     */
+    public static int csvToSqlFile(String csvFilePath, String tableName, boolean hasHeader,
+                                   String outputFilePath, Integer batchSize, String sqlType) {
+        try {
+            List<String> sqlStatements = csvToSqlStatements(csvFilePath, tableName, hasHeader, batchSize, sqlType);
+            
+            // 写入文件
+            java.io.FileWriter writer = new java.io.FileWriter(outputFilePath);
+            for (String sql : sqlStatements) {
+                writer.write(sql);
+                writer.write(";\n");
+            }
+            writer.close();
+            
+            return sqlStatements.size();
+        } catch (Exception e) {
+            throw new RuntimeException("保存 SQL 文件失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 格式化 SQL 值（处理转义和类型）
+     *
+     * @param value 值
+     * @return 格式化后的 SQL 值字符串
+     */
+    private static String formatSqlValue(Object value) {
+        if (value == null) {
+            return "NULL";
+        }
+        
+        // 字符串类型需要加引号和转义
+        if (value instanceof String) {
+            String str = (String) value;
+            // 转义单引号
+            str = str.replace("'", "''");
+            // 转义反斜杠
+            str = str.replace("\\", "\\\\");
+            return "'" + str + "'";
+        }
+        
+        // 数字类型直接返回
+        if (value instanceof Number) {
+            return value.toString();
+        }
+        
+        // 布尔类型
+        if (value instanceof Boolean) {
+            return value.toString();
+        }
+        
+        // 日期时间类型
+        if (value instanceof java.sql.Date || value instanceof java.sql.Timestamp) {
+            return "'" + value.toString() + "'";
+        }
+        
+        // 其他类型转为字符串
+        String str = value.toString();
+        str = str.replace("'", "''");
+        str = str.replace("\\", "\\\\");
+        return "'" + str + "'";
+    }
+
+    /**
+     * 将 Dataset 转换为 INSERT 语句
+     *
+     * @param dataset Dataset
+     * @param tableName 目标表名
+     * @param batchSize 批量生成大小
+     * @return INSERT 语句列表
+     */
+    public static List<String> datasetToInsertStatements(Dataset<Row> dataset, String tableName, Integer batchSize) {
+        return datasetToSqlStatements(dataset, tableName, batchSize, "INSERT");
+    }
+
+    /**
+     * 将 Dataset 转换为 REPLACE 语句
+     *
+     * @param dataset Dataset
+     * @param tableName 目标表名
+     * @param batchSize 批量生成大小
+     * @return REPLACE 语句列表
+     */
+    public static List<String> datasetToReplaceStatements(Dataset<Row> dataset, String tableName, Integer batchSize) {
+        return datasetToSqlStatements(dataset, tableName, batchSize, "REPLACE");
+    }
+
+    /**
+     * 将 Dataset 转换为 SQL 语句
+     *
+     * @param dataset Dataset
+     * @param tableName 目标表名
+     * @param batchSize 批量生成大小
+     * @param sqlType SQL 类型：INSERT 或 REPLACE
+     * @return SQL 语句列表
+     */
+    public static List<String> datasetToSqlStatements(Dataset<Row> dataset, String tableName, 
+                                                      Integer batchSize, String sqlType) {
+        List<String> sqlStatements = new ArrayList<>();
+        
+        try {
+            String[] columns = dataset.columns();
+            Row[] rows = (Row[]) dataset.collect();
+            
+            if (rows.length == 0) {
+                return sqlStatements;
+            }
+            
+            String columnsPart = String.join(", ", columns);
+            boolean useBatch = batchSize != null && batchSize > 0;
+            int actualBatchSize = useBatch ? batchSize : 1;
+            
+            StringBuilder currentBatch = new StringBuilder();
+            int currentBatchCount = 0;
+            
+            for (Row row : rows) {
+                StringBuilder values = new StringBuilder("(");
+                for (int i = 0; i < columns.length; i++) {
+                    if (i > 0) {
+                        values.append(", ");
+                    }
+                    Object value = row.get(i);
+                    values.append(formatSqlValue(value));
+                }
+                values.append(")");
+                
+                if (useBatch) {
+                    if (currentBatchCount == 0) {
+                        currentBatch.append(sqlType).append(" INTO ").append(tableName)
+                                .append(" (").append(columnsPart).append(") VALUES ");
+                    } else {
+                        currentBatch.append(", ");
+                    }
+                    currentBatch.append(values);
+                    currentBatchCount++;
+                    
+                    if (currentBatchCount >= actualBatchSize) {
+                        sqlStatements.add(currentBatch.toString());
+                        currentBatch = new StringBuilder();
+                        currentBatchCount = 0;
+                    }
+                } else {
+                    String sql = sqlType + " INTO " + tableName + " (" + columnsPart + ") VALUES " + values;
+                    sqlStatements.add(sql);
+                }
+            }
+            
+            if (useBatch && currentBatchCount > 0) {
+                sqlStatements.add(currentBatch.toString());
+            }
+            
+        } catch (Exception e) {
+            throw new RuntimeException("转换 Dataset 到 SQL 语句失败: " + e.getMessage(), e);
+        }
+        
+        return sqlStatements;
+    }
 }

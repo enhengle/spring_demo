@@ -160,6 +160,90 @@ public class SparkController {
     }
 
     /**
+     * 将 CSV 文件转换为 INSERT 语句
+     * POST /api/spark/csv/to-insert
+     * Body: {"csvFilePath": "data.csv", "tableName": "users", "hasHeader": true, "batchSize": 100}
+     */
+    @PostMapping("/csv/to-insert")
+    public Map<String, Object> csvToInsert(@RequestBody Map<String, Object> request) {
+        String csvFilePath = (String) request.get("csvFilePath");
+        String tableName = (String) request.get("tableName");
+        Boolean hasHeader = request.get("hasHeader") != null ? 
+            Boolean.parseBoolean(request.get("hasHeader").toString()) : true;
+        Integer batchSize = request.get("batchSize") != null ? 
+            Integer.parseInt(request.get("batchSize").toString()) : null;
+        
+        return sparkService.csvToInsertStatements(csvFilePath, tableName, hasHeader, batchSize);
+    }
+
+    /**
+     * 将 CSV 文件转换为 REPLACE 语句
+     * POST /api/spark/csv/to-replace
+     * Body: {"csvFilePath": "data.csv", "tableName": "users", "hasHeader": true, "batchSize": 100}
+     */
+    @PostMapping("/csv/to-replace")
+    public Map<String, Object> csvToReplace(@RequestBody Map<String, Object> request) {
+        String csvFilePath = (String) request.get("csvFilePath");
+        String tableName = (String) request.get("tableName");
+        Boolean hasHeader = request.get("hasHeader") != null ? 
+            Boolean.parseBoolean(request.get("hasHeader").toString()) : true;
+        Integer batchSize = request.get("batchSize") != null ? 
+            Integer.parseInt(request.get("batchSize").toString()) : null;
+        
+        return sparkService.csvToReplaceStatements(csvFilePath, tableName, hasHeader, batchSize);
+    }
+
+    /**
+     * 将 CSV 文件转换为 SQL 语句并保存到文件
+     * POST /api/spark/csv/to-sql-file
+     * Body: {"csvFilePath": "data.csv", "tableName": "users", "hasHeader": true, 
+     *        "outputFilePath": "output.sql", "batchSize": 100, "sqlType": "INSERT"}
+     */
+    @PostMapping("/csv/to-sql-file")
+    public Map<String, Object> csvToSqlFile(@RequestBody Map<String, Object> request) {
+        String csvFilePath = (String) request.get("csvFilePath");
+        String tableName = (String) request.get("tableName");
+        Boolean hasHeader = request.get("hasHeader") != null ? 
+            Boolean.parseBoolean(request.get("hasHeader").toString()) : true;
+        String outputFilePath = (String) request.get("outputFilePath");
+        Integer batchSize = request.get("batchSize") != null ? 
+            Integer.parseInt(request.get("batchSize").toString()) : null;
+        String sqlType = (String) request.getOrDefault("sqlType", "INSERT");
+        
+        return sparkService.csvToSqlFile(csvFilePath, tableName, hasHeader, outputFilePath, batchSize, sqlType);
+    }
+
+    /**
+     * 将视图数据转换为 INSERT 语句
+     * POST /api/spark/view/{viewName}/to-insert
+     * Body: {"tableName": "users", "batchSize": 100}
+     */
+    @PostMapping("/view/{viewName}/to-insert")
+    public Map<String, Object> viewToInsert(@PathVariable String viewName, 
+                                           @RequestBody Map<String, Object> request) {
+        String tableName = (String) request.get("tableName");
+        Integer batchSize = request.get("batchSize") != null ? 
+            Integer.parseInt(request.get("batchSize").toString()) : null;
+        
+        return sparkService.viewToInsertStatements(viewName, tableName, batchSize);
+    }
+
+    /**
+     * 将视图数据转换为 REPLACE 语句
+     * POST /api/spark/view/{viewName}/to-replace
+     * Body: {"tableName": "users", "batchSize": 100}
+     */
+    @PostMapping("/view/{viewName}/to-replace")
+    public Map<String, Object> viewToReplace(@PathVariable String viewName, 
+                                             @RequestBody Map<String, Object> request) {
+        String tableName = (String) request.get("tableName");
+        Integer batchSize = request.get("batchSize") != null ? 
+            Integer.parseInt(request.get("batchSize").toString()) : null;
+        
+        return sparkService.viewToReplaceStatements(viewName, tableName, batchSize);
+    }
+
+    /**
      * 健康检查
      * GET /api/spark/health
      */

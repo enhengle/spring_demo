@@ -365,4 +365,167 @@ public class SparkService {
             return result;
         }
     }
+
+    /**
+     * 将 CSV 文件转换为 INSERT 语句
+     *
+     * @param csvFilePath CSV 文件路径
+     * @param tableName 目标表名
+     * @param hasHeader 是否包含表头
+     * @param batchSize 批量生成大小（可选，null 表示每条数据一个语句）
+     * @return 转换结果
+     */
+    public Map<String, Object> csvToInsertStatements(String csvFilePath, String tableName, 
+                                                      Boolean hasHeader, Integer batchSize) {
+        try {
+            List<String> statements = SparkUtils.csvToInsertStatements(
+                csvFilePath, tableName, hasHeader != null && hasHeader, batchSize);
+            
+            Map<String, Object> result = new java.util.HashMap<>();
+            result.put("success", true);
+            result.put("message", "转换成功");
+            result.put("tableName", tableName);
+            result.put("statementCount", statements.size());
+            result.put("statements", statements);
+            return result;
+        } catch (Exception e) {
+            Map<String, Object> result = new java.util.HashMap<>();
+            result.put("success", false);
+            result.put("message", "转换失败: " + e.getMessage());
+            return result;
+        }
+    }
+
+    /**
+     * 将 CSV 文件转换为 REPLACE 语句
+     *
+     * @param csvFilePath CSV 文件路径
+     * @param tableName 目标表名
+     * @param hasHeader 是否包含表头
+     * @param batchSize 批量生成大小（可选，null 表示每条数据一个语句）
+     * @return 转换结果
+     */
+    public Map<String, Object> csvToReplaceStatements(String csvFilePath, String tableName, 
+                                                       Boolean hasHeader, Integer batchSize) {
+        try {
+            List<String> statements = SparkUtils.csvToReplaceStatements(
+                csvFilePath, tableName, hasHeader != null && hasHeader, batchSize);
+            
+            Map<String, Object> result = new java.util.HashMap<>();
+            result.put("success", true);
+            result.put("message", "转换成功");
+            result.put("tableName", tableName);
+            result.put("statementCount", statements.size());
+            result.put("statements", statements);
+            return result;
+        } catch (Exception e) {
+            Map<String, Object> result = new java.util.HashMap<>();
+            result.put("success", false);
+            result.put("message", "转换失败: " + e.getMessage());
+            return result;
+        }
+    }
+
+    /**
+     * 将 CSV 文件转换为 SQL 语句并保存到文件
+     *
+     * @param csvFilePath CSV 文件路径
+     * @param tableName 目标表名
+     * @param hasHeader 是否包含表头
+     * @param outputFilePath 输出 SQL 文件路径
+     * @param batchSize 批量生成大小
+     * @param sqlType SQL 类型（INSERT 或 REPLACE）
+     * @return 转换结果
+     */
+    public Map<String, Object> csvToSqlFile(String csvFilePath, String tableName, Boolean hasHeader,
+                                            String outputFilePath, Integer batchSize, String sqlType) {
+        try {
+            int count = SparkUtils.csvToSqlFile(
+                csvFilePath, tableName, hasHeader != null && hasHeader, 
+                outputFilePath, batchSize, sqlType);
+            
+            Map<String, Object> result = new java.util.HashMap<>();
+            result.put("success", true);
+            result.put("message", "转换并保存成功");
+            result.put("tableName", tableName);
+            result.put("statementCount", count);
+            result.put("outputFile", outputFilePath);
+            return result;
+        } catch (Exception e) {
+            Map<String, Object> result = new java.util.HashMap<>();
+            result.put("success", false);
+            result.put("message", "转换并保存失败: " + e.getMessage());
+            return result;
+        }
+    }
+
+    /**
+     * 将视图数据转换为 INSERT 语句
+     *
+     * @param viewName 视图名称
+     * @param tableName 目标表名
+     * @param batchSize 批量生成大小
+     * @return 转换结果
+     */
+    public Map<String, Object> viewToInsertStatements(String viewName, String tableName, Integer batchSize) {
+        try {
+            if (!SparkUtils.tempViewExists(viewName)) {
+                Map<String, Object> result = new java.util.HashMap<>();
+                result.put("success", false);
+                result.put("message", "视图不存在: " + viewName);
+                return result;
+            }
+
+            Dataset<Row> df = SparkUtils.getSparkSession().table(viewName);
+            List<String> statements = SparkUtils.datasetToInsertStatements(df, tableName, batchSize);
+            
+            Map<String, Object> result = new java.util.HashMap<>();
+            result.put("success", true);
+            result.put("message", "转换成功");
+            result.put("tableName", tableName);
+            result.put("statementCount", statements.size());
+            result.put("statements", statements);
+            return result;
+        } catch (Exception e) {
+            Map<String, Object> result = new java.util.HashMap<>();
+            result.put("success", false);
+            result.put("message", "转换失败: " + e.getMessage());
+            return result;
+        }
+    }
+
+    /**
+     * 将视图数据转换为 REPLACE 语句
+     *
+     * @param viewName 视图名称
+     * @param tableName 目标表名
+     * @param batchSize 批量生成大小
+     * @return 转换结果
+     */
+    public Map<String, Object> viewToReplaceStatements(String viewName, String tableName, Integer batchSize) {
+        try {
+            if (!SparkUtils.tempViewExists(viewName)) {
+                Map<String, Object> result = new java.util.HashMap<>();
+                result.put("success", false);
+                result.put("message", "视图不存在: " + viewName);
+                return result;
+            }
+
+            Dataset<Row> df = SparkUtils.getSparkSession().table(viewName);
+            List<String> statements = SparkUtils.datasetToReplaceStatements(df, tableName, batchSize);
+            
+            Map<String, Object> result = new java.util.HashMap<>();
+            result.put("success", true);
+            result.put("message", "转换成功");
+            result.put("tableName", tableName);
+            result.put("statementCount", statements.size());
+            result.put("statements", statements);
+            return result;
+        } catch (Exception e) {
+            Map<String, Object> result = new java.util.HashMap<>();
+            result.put("success", false);
+            result.put("message", "转换失败: " + e.getMessage());
+            return result;
+        }
+    }
 }
