@@ -202,7 +202,31 @@ SparkUtils.printSchema(df);
 long count = SparkUtils.count(df);
 ```
 
-#### 6. **资源管理**
+#### 6. **CSV 转 SQL 语句**
+```java
+// CSV 转 INSERT 语句（单条模式）
+List<String> statements = SparkUtils.csvToInsertStatements(
+    "data/users.csv", "users", true, null);
+
+// CSV 转 INSERT 语句（批量模式，每批100条）
+List<String> batchStatements = SparkUtils.csvToInsertStatements(
+    "data/users.csv", "users", true, 100);
+
+// CSV 转 REPLACE 语句
+List<String> replaceStatements = SparkUtils.csvToReplaceStatements(
+    "data/users.csv", "users", true, 100);
+
+// CSV 转 SQL 并保存到文件
+int count = SparkUtils.csvToSqlFile(
+    "data/users.csv", "users", true, 
+    "output/insert_users.sql", 100, "INSERT");
+
+// Dataset 转 INSERT 语句
+Dataset<Row> df = SparkUtils.readCsv("data/users.csv", true);
+List<String> statements = SparkUtils.datasetToInsertStatements(df, "users", 100);
+```
+
+#### 7. **资源管理**
 ```java
 // 关闭所有资源
 SparkUtils.closeAll();
@@ -210,6 +234,7 @@ SparkUtils.closeAll();
 
 ### 完整示例
 
+#### 示例 1: 基本数据处理
 ```java
 // 1. 读取 CSV 文件
 Dataset<Row> df = SparkUtils.readCsv("data/users.csv", true);
@@ -236,6 +261,23 @@ SparkUtils.writeCsv(result, "output/filtered_users.csv");
 SparkUtils.closeAll();
 ```
 
+#### 示例 2: CSV 转 SQL 语句
+```java
+// 1. 将 CSV 文件转换为 INSERT 语句
+List<String> insertStatements = SparkUtils.csvToInsertStatements(
+    "data/users.csv", "users", true, 100);
+
+// 2. 打印生成的 SQL 语句
+for (String sql : insertStatements) {
+    System.out.println(sql + ";");
+}
+
+// 3. 或者直接保存到文件
+SparkUtils.csvToSqlFile(
+    "data/users.csv", "users", true,
+    "output/insert_users.sql", 100, "INSERT");
+```
+
 ---
 
 ## 🧪 测试用例
@@ -253,6 +295,8 @@ mvn test
 - ✅ JSON 文件读写
 - ✅ SQL 查询执行
 - ✅ 数据转换操作
+- ✅ CSV 转 SQL 语句（INSERT/REPLACE）
+- ✅ 批量 SQL 生成
 - ✅ 资源管理
 
 ---
@@ -294,9 +338,15 @@ Dataset<Row> df = SparkUtils.readCsv("data.csv", true);
 
 ## 📖 更多资源
 
+### 文档
 - [Apache Spark 官方文档](https://spark.apache.org/docs/latest/)
 - [Spark SQL 编程指南](https://spark.apache.org/docs/latest/sql-programming-guide.html)
 - [Spark RDD 编程指南](https://spark.apache.org/docs/latest/rdd-programming-guide.html)
+
+### 项目文档
+- [CSV 转 SQL 功能指南](CSV_TO_SQL_GUIDE.md) - CSV 转 INSERT/REPLACE 语句详细说明
+- [Spark API 文档](SPARK_API_DOCUMENTATION.md) - REST API 接口文档
+- [Spark 视图 SQL 使用指南](SPARK_VIEW_SQL_USAGE.md) - 临时视图创建和使用
 
 ---
 
@@ -306,6 +356,10 @@ Dataset<Row> df = SparkUtils.readCsv("data.csv", true);
 2. **资源管理**: 使用完毕后记得调用 `closeAll()` 关闭资源
 3. **数据量**: 本地模式处理数据量有限，建议不超过几 GB
 4. **内存**: 确保有足够的内存运行 Spark
+5. **CSV 转 SQL**: 
+   - 大数据量建议使用批量模式（batchSize > 0）提高效率
+   - 生成的 SQL 语句已自动处理特殊字符转义
+   - 单条模式适合小数据量或需要逐条控制的情况
 
 ---
 
