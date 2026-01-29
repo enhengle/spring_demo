@@ -92,6 +92,13 @@
             <artifactId>poi-ooxml</artifactId>
             <version>5.2.3</version>
         </dependency>
+        
+        <!-- EasyExcel - 快速 Excel 处理（性能优于 POI） -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>easyexcel</artifactId>
+            <version>3.3.2</version>
+        </dependency>
 
         <!-- Apache Jena - RDF 操作 (使用 3.x 版本以兼容 Java 8) -->
         <dependency>

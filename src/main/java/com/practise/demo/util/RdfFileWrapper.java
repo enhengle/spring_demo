@@ -3,8 +3,7 @@ package com.practise.demo.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -140,22 +139,51 @@ public class RdfFileWrapper {
             String baseName = getBaseName(inputFile.getName());
             String extension = getExtension(inputFile.getName());
             
-            // 临时实现：读取文件并分割
-            List<String> lines = Files.readAllLines(inputFile.toPath(), StandardCharsets.UTF_8);
-            int totalLines = lines.size();
-            int partCount = (int) Math.ceil((double) totalLines / linesPerFile);
-            
-            for (int i = 0; i < partCount; i++) {
-                int start = i * linesPerFile;
-                int end = Math.min(start + linesPerFile, totalLines);
+            // 优化实现：使用大缓冲区流式处理，避免一次性加载全部内容
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(
+                            new BufferedInputStream(
+                                    new FileInputStream(inputFile), 8192 * 1024), // 8MB 缓冲区
+                            StandardCharsets.UTF_8), 
+                    8192 * 1024)) {
                 
-                String partFileName = String.format("%s_part%03d%s", baseName, i + 1, extension);
-                File partFile = new File(outputDir, partFileName);
+                int fileIndex = 1;
+                BufferedWriter currentWriter = null;
+                int currentLineCount = 0;
+                String line;
                 
-                List<String> partLines = lines.subList(start, end);
-                Files.write(partFile.toPath(), partLines, StandardCharsets.UTF_8);
+                while ((line = reader.readLine()) != null) {
+                    // 如果当前文件行数达到限制，创建新文件
+                    if (currentWriter == null || currentLineCount >= linesPerFile) {
+                        // 关闭当前文件
+                        if (currentWriter != null) {
+                            currentWriter.close();
+                        }
+                        
+                        // 创建新文件（使用大缓冲区）
+                        String partFileName = String.format("%s_part%03d%s", baseName, fileIndex, extension);
+                        File partFile = new File(outputDir, partFileName);
+                        currentWriter = new BufferedWriter(
+                                new OutputStreamWriter(
+                                        new BufferedOutputStream(
+                                                new FileOutputStream(partFile), 8192 * 1024),
+                                        StandardCharsets.UTF_8),
+                                8192 * 1024);
+                        outputFiles.add(partFile.getAbsolutePath());
+                        currentLineCount = 0;
+                        fileIndex++;
+                    }
+                    
+                    // 写入当前行
+                    currentWriter.write(line);
+                    currentWriter.newLine();
+                    currentLineCount++;
+                }
                 
-                outputFiles.add(partFile.getAbsolutePath());
+                // 关闭最后一个文件
+                if (currentWriter != null) {
+                    currentWriter.close();
+                }
             }
             
             logger.info("文件切割完成: {} -> {} 个文件", inputFile.getName(), outputFiles.size());
