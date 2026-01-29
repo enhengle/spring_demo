@@ -76,7 +76,6 @@ public class OperationLogAspect {
         
         Object result = null;
         String resultStr = "";
-        Exception exception = null;
         
         try {
             // 执行方法
@@ -101,7 +100,6 @@ public class OperationLogAspect {
             return result;
             
         } catch (Exception e) {
-            exception = e;
             long endTime = System.currentTimeMillis();
             long duration = endTime - startTime;
             

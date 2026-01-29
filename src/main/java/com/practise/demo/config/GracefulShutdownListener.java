@@ -55,7 +55,9 @@ public class GracefulShutdownListener implements ApplicationListener<ContextClos
     
     /**
      * 优雅关闭线程池
+     * 预留方法，用于未来扩展
      */
+    @SuppressWarnings("unused")
     private void shutdownExecutor(ExecutorService executor, String name) {
         if (executor != null && !executor.isShutdown()) {
             logger.info("开始关闭线程池: {}", name);

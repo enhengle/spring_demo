@@ -1,0 +1,15 @@
+# RDF 示例文件（N-Triples 格式）
+# 每行一个三元组，格式：<subject> <predicate> <object> .
+
+<http://example.org/Person> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<http://example.org/alice> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.org/Person> .
+<http://example.org/alice> <http://xmlns.com/foaf/0.1/name> "Alice" .
+<http://example.org/alice> <http://example.org/age> "30"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.org/alice> <http://example.org/email> "alice@example.org" .
+<http://example.org/alice> <http://www.w3.org/2000/01/rdf-schema#label> "Alice"@en .
+<http://example.org/alice> <http://www.w3.org/2000/01/rdf-schema#label> "爱丽丝"@zh .
+<http://example.org/bob> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.org/Person> .
+<http://example.org/bob> <http://xmlns.com/foaf/0.1/name> "Bob" .
+<http://example.org/bob> <http://example.org/age> "25"^^<http://www.w3.org/2001/XMLSchema#integer> .
+<http://example.org/bob> <http://example.org/email> "bob@example.org" .
+<http://example.org/alice> <http://example.org/knows> <http://example.org/bob> .

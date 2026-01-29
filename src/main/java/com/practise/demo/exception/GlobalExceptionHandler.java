@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = ServerException.class)
     @ResponseBody
-    public Response serverErrorHandler(ServerException e) {
+    public Response<?> serverErrorHandler(ServerException e) {
         ErrorCode errorCode = e.getErrorCode() != null ? e.getErrorCode() : ErrorCode.BUSINESS_ERROR;
         String message = e.getErrorMessage() != null ? e.getErrorMessage() : e.getMessage();
         logger.error("业务异常: code={}, message={}", errorCode.getCode(), message, e);
@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     @ResponseBody
-    public Response handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public Response<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         FieldError fieldError = e.getBindingResult().getFieldError();
         String message = fieldError != null ? fieldError.getDefaultMessage() : "参数校验失败";
         logger.error("参数校验异常: {}", message);
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = BindException.class)
     @ResponseBody
-    public Response handleBindException(BindException e) {
+    public Response<?> handleBindException(BindException e) {
         FieldError fieldError = e.getBindingResult().getFieldError();
         String message = fieldError != null ? fieldError.getDefaultMessage() : "参数绑定失败";
         logger.error("参数绑定异常: {}", message);
@@ -67,7 +67,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = ConstraintViolationException.class)
     @ResponseBody
-    public Response handleConstraintViolationException(ConstraintViolationException e) {
+    public Response<?> handleConstraintViolationException(ConstraintViolationException e) {
         Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
         String message = violations.iterator().hasNext() 
                 ? violations.iterator().next().getMessage() 
@@ -81,7 +81,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
-    public Response errorHandler(Exception e) {
+    public Response<?> errorHandler(Exception e) {
         logger.error("系统异常: {}", e.getMessage(), e);
         return Response.error(ErrorCode.SYSTEM_ERROR.getCode(), "系统异常，请联系管理员");
     }

@@ -1,0 +1,35 @@
+{
+  "@context": {
+    "ex": "http://example.org/",
+    "foaf": "http://xmlns.com/foaf/0.1/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "name": "foaf:name",
+    "age": "ex:age",
+    "email": "ex:email",
+    "knows": "ex:knows",
+    "Person": "ex:Person"
+  },
+  "@id": "ex:alice",
+  "@type": "Person",
+  "name": "Alice",
+  "age": 30,
+  "email": "alice@example.org",
+  "rdfs:label": [
+    {
+      "@value": "Alice",
+      "@language": "en"
+    },
+    {
+      "@value": "爱丽丝",
+      "@language": "zh"
+    }
+  ],
+  "knows": {
+    "@id": "ex:bob",
+    "@type": "Person",
+    "name": "Bob",
+    "age": 25,
+    "email": "bob@example.org"
+  }
+}

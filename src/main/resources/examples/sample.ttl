@@ -1,0 +1,28 @@
+# RDF 示例文件（Turtle 格式）
+# 这是一个简单的 RDF 数据示例
+
+@prefix ex: <http://example.org/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# 定义 Person 类型
+ex:Person a rdfs:Class .
+
+# Alice 的信息
+ex:alice a ex:Person ;
+    foaf:name "Alice" ;
+    ex:age 30 ;
+    ex:email "alice@example.org" ;
+    rdfs:label "Alice"@en ;
+    rdfs:label "爱丽丝"@zh .
+
+# Bob 的信息
+ex:bob a ex:Person ;
+    foaf:name "Bob" ;
+    ex:age 25 ;
+    ex:email "bob@example.org" ;
+    rdfs:label "Bob"@en .
+
+# Alice 和 Bob 是朋友关系
+ex:alice ex:knows ex:bob .
