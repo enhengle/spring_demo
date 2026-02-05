@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>讯飞星火AI测试页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab:hover {
+            background: #e8e8e8;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: white;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .response-area {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 2px solid #e0e0e0;
+            min-height: 200px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .response-area.streaming {
+            border-color: #667eea;
+        }
+        
+        .response-content {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #333;
+            padding: 10px;
+        }
+        
+        .response-meta {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+        
+        .success {
+            color: #155724;
+            background: #d4edda;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+        
+        .config-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .config-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .message-item {
+            background: white;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .message-item.user {
+            border-left-color: #28a745;
+        }
+        
+        .message-item.assistant {
+            border-left-color: #667eea;
+        }
+        
+        .message-role {
+            font-weight: 600;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .message-content {
+            color: #333;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-group .btn {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 讯飞星火AI测试平台</h1>
+            <p>测试所有AI对话接口功能</p>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('http')">HTTP接口</div>
+            <div class="tab" onclick="switchTab('websocket')">WebSocket流式</div>
+            <div class="tab" onclick="switchTab('config')">配置管理</div>
+        </div>
+        
+        <!-- HTTP接口标签页 -->
+        <div id="http" class="tab-content active">
+            <div class="config-section">
+                <h3>🌐 API配置</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>API地址</label>
+                        <input type="text" id="apiBaseUrl" value="http://localhost:1234" placeholder="http://localhost:1234">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 简单对话 -->
+            <div class="form-group">
+                <h3>💬 简单对话</h3>
+                <label>用户消息</label>
+                <textarea id="simpleMessage" placeholder="输入您的消息...">你好，请介绍一下你自己</textarea>
+                <div class="btn-group" style="margin-top: 10px;">
+                    <button class="btn btn-primary" onclick="testSimpleChat()">发送消息</button>
+                    <button class="btn btn-secondary" onclick="clearResponse('simpleResponse')">清空</button>
+                </div>
+                <div id="simpleResponse" class="response-area"></div>
+            </div>
+            
+            <!-- 完整对话 -->
+            <div class="form-group">
+                <h3>📝 完整对话（JSON格式）</h3>
+                <label>消息列表（JSON）</label>
+                <textarea id="chatMessages" placeholder='[{"role":"user","content":"你好"}]'>[{"role":"user","content":"推荐两个国内适合自驾的景点"}]</textarea>
+                <div class="btn-group" style="margin-top: 10px;">
+                    <button class="btn btn-primary" onclick="testChat()">发送消息</button>
+                    <button class="btn btn-secondary" onclick="clearResponse('chatResponse')">清空</button>
+                </div>
+                <div id="chatResponse" class="response-area"></div>
+            </div>
+            
+            <!-- 高级对话 -->
+            <div class="form-group">
+                <h3>⚙️ 高级对话（带参数）</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>温度参数 (0-1)</label>
+                        <input type="number" id="temperature" value="0.5" min="0" max="1" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>最大Token数</label>
+                        <input type="number" id="maxTokens" value="2048" min="1" max="4096">
+                    </div>
+                </div>
+                <label>消息列表（JSON）</label>
+                <textarea id="advancedMessages" placeholder='[{"role":"user","content":"你好"}]'>[{"role":"user","content":"写一首关于春天的诗"}]</textarea>
+                <div class="btn-group" style="margin-top: 10px;">
+                    <button class="btn btn-primary" onclick="testAdvancedChat()">发送消息</button>
+                    <button class="btn btn-secondary" onclick="clearResponse('advancedResponse')">清空</button>
+                </div>
+                <div id="advancedResponse" class="response-area"></div>
+            </div>
+        </div>
+        
+        <!-- WebSocket流式接口标签页 -->
+        <div id="websocket" class="tab-content">
+            <div class="config-section">
+                <h3>⚡ 流式配置</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>返回间隔（毫秒）</label>
+                        <input type="number" id="streamDelay" value="0" min="0" step="100" placeholder="0表示不延迟">
+                    </div>
+                    <div class="form-group">
+                        <label>温度参数</label>
+                        <input type="number" id="wsTemperature" value="0.5" min="0" max="1" step="0.1">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>最大Token数</label>
+                        <input type="number" id="wsMaxTokens" value="4096" min="1" max="4096">
+                    </div>
+                    <div class="form-group">
+                        <label>思考模式</label>
+                        <select id="thinking">
+                            <option value="">默认</option>
+                            <option value="deep">深度思考</option>
+                            <option value="normal">普通模式</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 简单流式对话 -->
+            <div class="form-group">
+                <h3>💨 简单流式对话（SSE）</h3>
+                <label>用户消息</label>
+                <textarea id="simpleStreamMessage" placeholder="输入您的消息...">请用Python写一个快速排序算法</textarea>
+                <div class="btn-group" style="margin-top: 10px;">
+                    <button class="btn btn-primary" onclick="testSimpleStream()">开始流式对话</button>
+                    <button class="btn btn-secondary" onclick="stopStream('simpleStreamResponse')">停止</button>
+                    <button class="btn btn-secondary" onclick="clearResponse('simpleStreamResponse')">清空</button>
+                </div>
+                <div id="simpleStreamResponse" class="response-area"></div>
+            </div>
+            
+            <!-- 流式对话 -->
+            <div class="form-group">
+                <h3>🌊 流式对话（SSE）</h3>
+                <label>消息列表（JSON）</label>
+                <textarea id="streamMessages" placeholder='[{"role":"user","content":"你好"}]'>[{"role":"user","content":"推荐两个国内适合自驾的景点"}]</textarea>
+                <div class="btn-group" style="margin-top: 10px;">
+                    <button class="btn btn-primary" onclick="testStreamChat()">开始流式对话</button>
+                    <button class="btn btn-secondary" onclick="stopStream('streamResponse')">停止</button>
+                    <button class="btn btn-secondary" onclick="clearResponse('streamResponse')">清空</button>
+                </div>
+                <div id="streamResponse" class="response-area"></div>
+            </div>
+            
+            <!-- 非流式WebSocket -->
+            <div class="form-group">
+                <h3>🔷 WebSocket非流式</h3>
+                <label>消息列表（JSON）</label>
+                <textarea id="wsMessages" placeholder='[{"role":"user","content":"你好"}]'>[{"role":"user","content":"推荐两个国内适合自驾的景点"}]</textarea>
+                <div class="btn-group" style="margin-top: 10px;">
+                    <button class="btn btn-primary" onclick="testWebSocketChat()">发送消息</button>
+                    <button class="btn btn-secondary" onclick="clearResponse('wsResponse')">清空</button>
+                </div>
+                <div id="wsResponse" class="response-area"></div>
+            </div>
+        </div>
+        
+        <!-- 配置管理标签页 -->
+        <div id="config" class="tab-content">
+            <div class="config-section">
+                <h3>⚙️ 接口配置</h3>
+                <div class="form-group">
+                    <label>API基础地址</label>
+                    <input type="text" id="configApiUrl" value="http://localhost:1234" placeholder="http://localhost:1234">
+                </div>
+                <button class="btn btn-primary" onclick="saveConfig()">保存配置</button>
+            </div>
+            
+            <div class="config-section">
+                <h3>📋 接口列表</h3>
+                <div style="background: white; padding: 15px; border-radius: 6px;">
+                    <h4>HTTP接口：</h4>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><code>POST /api/spark-ai/chat/simple</code> - 简单对话</li>
+                        <li><code>POST /api/spark-ai/chat/multi-turn</code> - 多轮对话</li>
+                        <li><code>POST /api/spark-ai/chat</code> - 完整对话</li>
+                        <li><code>POST /api/spark-ai/chat/advanced</code> - 高级对话</li>
+                        <li><code>POST /api/spark-ai/conversation/create</code> - 创建对话历史</li>
+                    </ul>
+                    <h4 style="margin-top: 20px;">WebSocket接口：</h4>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><code>POST /api/spark-ai/ws/chat/stream</code> - 流式聊天（SSE）</li>
+                        <li><code>POST /api/spark-ai/ws/chat/simple/stream</code> - 简单流式聊天（SSE）</li>
+                        <li><code>POST /api/spark-ai/ws/chat</code> - WebSocket非流式</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 全局变量
+        let eventSource = null;
+        let currentStreamId = null;
+        
+        // 切换标签页
+        function switchTab(tabName) {
+            // 隐藏所有标签页内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            // 移除所有标签的active类
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // 显示选中的标签页
+            document.getElementById(tabName).classList.add('active');
+            // 激活对应的标签
+            event.target.classList.add('active');
+        }
+        
+        // 获取API基础地址
+        function getBaseUrl() {
+            return document.getElementById('apiBaseUrl').value || 'http://localhost:1234';
+        }
+        
+        // 清空响应区域
+        function clearResponse(responseId) {
+            document.getElementById(responseId).innerHTML = '';
+        }
+        
+        // 显示响应
+        function showResponse(responseId, content, isError = false) {
+            const responseArea = document.getElementById(responseId);
+            const className = isError ? 'error' : 'success';
+            responseArea.innerHTML = `<div class="${className}">${content}</div>`;
+        }
+        
+        // 追加流式内容
+        function appendStreamContent(responseId, content) {
+            const responseArea = document.getElementById(responseId);
+            if (!responseArea) {
+                console.error('Response area not found:', responseId);
+                return;
+            }
+            responseArea.classList.add('streaming');
+            
+            // 如果响应区域为空，先初始化
+            if (!responseArea.innerHTML || responseArea.innerHTML.trim() === '') {
+                responseArea.innerHTML = '<div class="response-content"></div>';
+            }
+            
+            // 查找或创建响应内容容器
+            let contentDiv = responseArea.querySelector('.response-content');
+            if (!contentDiv) {
+                contentDiv = document.createElement('div');
+                contentDiv.className = 'response-content';
+                responseArea.appendChild(contentDiv);
+            }
+            
+            // 追加内容（转义HTML但保留换行等格式）
+            if (content !== undefined && content !== null) {
+                // 转义HTML特殊字符
+                const escapedContent = escapeHtml(String(content));
+                
+                // 追加内容（使用innerHTML，CSS的white-space: pre-wrap会保留换行和空格）
+                const currentHtml = contentDiv.innerHTML || '';
+                contentDiv.innerHTML = currentHtml + escapedContent;
+                
+                // 调试日志（仅开发环境）
+                const contentStr = String(content);
+                if (contentStr.length > 0) {
+                    console.debug('追加内容，长度:', contentStr.length, '内容预览:', contentStr.substring(0, Math.min(20, contentStr.length)));
+                }
+            }
+            
+            // 滚动到底部
+            responseArea.scrollTop = responseArea.scrollHeight;
+        }
+        
+        // 停止流式响应
+        function stopStream(responseId) {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+            const responseArea = document.getElementById(responseId);
+            responseArea.classList.remove('streaming');
+        }
+        
+        // 测试简单对话
+        async function testSimpleChat() {
+            const message = document.getElementById('simpleMessage').value.trim();
+            if (!message) {
+                showResponse('simpleResponse', '请输入消息', true);
+                return;
+            }
+            
+            showResponse('simpleResponse', '<div class="loading"></div>正在发送请求...');
+            
+            try {
+                const response = await fetch(`${getBaseUrl()}/api/spark-ai/chat/simple?message=${encodeURIComponent(message)}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                });
+                
+                const data = await response.json();
+                if (data.code === 0 || data.code === 200) {
+                    const content = data.data || data.date || '';
+                    showResponse('simpleResponse', `<div class="response-content">${escapeHtml(content)}</div>`);
+                } else {
+                    showResponse('simpleResponse', `错误: ${data.message || '未知错误'}`, true);
+                }
+            } catch (error) {
+                showResponse('simpleResponse', `请求失败: ${error.message}`, true);
+            }
+        }
+        
+        // 测试完整对话
+        async function testChat() {
+            const messagesText = document.getElementById('chatMessages').value.trim();
+            if (!messagesText) {
+                showResponse('chatResponse', '请输入消息列表', true);
+                return;
+            }
+            
+            let messages;
+            try {
+                messages = JSON.parse(messagesText);
+            } catch (e) {
+                showResponse('chatResponse', 'JSON格式错误: ' + e.message, true);
+                return;
+            }
+            
+            showResponse('chatResponse', '<div class="loading"></div>正在发送请求...');
+            
+            try {
+                const response = await fetch(`${getBaseUrl()}/api/spark-ai/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(messages)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                if (data.code === 0 || data.code === 200) {
+                    const responseData = data.data || data.date;
+                    let content = '';
+                    if (responseData) {
+                        if (responseData.choices && responseData.choices.length > 0) {
+                            content = responseData.choices[0].message.content;
+                        } else if (typeof responseData === 'string') {
+                            content = responseData;
+                        }
+                    }
+                    const meta = responseData && typeof responseData === 'object' ? 
+                        `<div class="response-meta">模型: ${responseData.model || 'N/A'} | Token使用: ${responseData.usage ? responseData.usage.totalTokens : 'N/A'}</div>` : '';
+                    showResponse('chatResponse', `<div class="response-content">${escapeHtml(content)}</div>${meta}`);
+                } else {
+                    showResponse('chatResponse', `错误: ${data.message || '未知错误'}`, true);
+                }
+            } catch (error) {
+                showResponse('chatResponse', `请求失败: ${error.message}`, true);
+            }
+        }
+        
+        // 测试高级对话
+        async function testAdvancedChat() {
+            const messagesText = document.getElementById('advancedMessages').value.trim();
+            if (!messagesText) {
+                showResponse('advancedResponse', '请输入消息列表', true);
+                return;
+            }
+            
+            let messages;
+            try {
+                messages = JSON.parse(messagesText);
+            } catch (e) {
+                showResponse('advancedResponse', 'JSON格式错误: ' + e.message, true);
+                return;
+            }
+            
+            const temperature = document.getElementById('temperature').value;
+            const maxTokens = document.getElementById('maxTokens').value;
+            
+            showResponse('advancedResponse', '<div class="loading"></div>正在发送请求...');
+            
+            try {
+                const params = new URLSearchParams();
+                if (temperature) params.append('temperature', temperature);
+                if (maxTokens) params.append('maxTokens', maxTokens);
+                
+                const response = await fetch(`${getBaseUrl()}/api/spark-ai/chat/advanced?${params.toString()}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(messages)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                if (data.code === 0 || data.code === 200) {
+                    const responseData = data.data || data.date;
+                    let content = '';
+                    if (responseData) {
+                        if (responseData.choices && responseData.choices.length > 0) {
+                            content = responseData.choices[0].message.content;
+                        } else if (typeof responseData === 'string') {
+                            content = responseData;
+                        }
+                    }
+                    const meta = responseData && typeof responseData === 'object' ? 
+                        `<div class="response-meta">模型: ${responseData.model || 'N/A'} | Token使用: ${responseData.usage ? responseData.usage.totalTokens : 'N/A'}</div>` : '';
+                    showResponse('advancedResponse', `<div class="response-content">${escapeHtml(content)}</div>${meta}`);
+                } else {
+                    showResponse('advancedResponse', `错误: ${data.message || '未知错误'}`, true);
+                }
+            } catch (error) {
+                showResponse('advancedResponse', `请求失败: ${error.message}`, true);
+            }
+        }
+        
+        // 测试简单流式对话
+        function testSimpleStream() {
+            const message = document.getElementById('simpleStreamMessage').value.trim();
+            if (!message) {
+                showResponse('simpleStreamResponse', '请输入消息', true);
+                return;
+            }
+            
+            const streamDelay = document.getElementById('streamDelay').value;
+            stopStream('simpleStreamResponse');
+            clearResponse('simpleStreamResponse');
+            
+            const params = new URLSearchParams();
+            params.append('message', message);
+            if (streamDelay) params.append('streamDelay', streamDelay);
+            
+            // EventSource只支持GET，但后端是POST，改用fetch + ReadableStream
+            fetch(`${getBaseUrl()}/api/spark-ai/ws/chat/simple/stream?${params.toString()}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'text/event-stream'
+                }
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status} ${response.statusText}`);
+                }
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                document.getElementById('simpleStreamResponse').classList.add('streaming');
+                
+                let buffer = '';
+                let totalDataBlocks = 0;
+                let totalChars = 0;
+                
+                function readStream() {
+                    reader.read().then(({ done, value }) => {
+                        if (done) {
+                            // 处理剩余的buffer
+                            if (buffer) {
+                                console.debug('处理最终buffer，长度:', buffer.length);
+                                processSimpleSSELines(buffer);
+                            }
+                            console.log(`=== 流式响应完成 === 总共处理了${totalDataBlocks}个数据块，${totalChars}个字符`);
+                            document.getElementById('simpleStreamResponse').classList.remove('streaming');
+                            return;
+                        }
+                        
+                        // 累积数据到buffer
+                        const decoded = decoder.decode(value, { stream: true });
+                        buffer += decoded;
+                        
+                        // 按行分割，保留最后一个不完整的行
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop() || ''; // 保留最后一个不完整的行
+                        
+                        // 处理完整的行
+                        const completeLines = lines.join('\n');
+                        if (completeLines) {
+                            console.debug('处理SSE数据块，长度:', completeLines.length, '预览:', completeLines.substring(0, Math.min(100, completeLines.length)));
+                            processSimpleSSELines(completeLines);
+                        }
+                        
+                        readStream();
+                    }).catch(error => {
+                        console.error('流式读取错误:', error);
+                        console.log(`=== 流式响应中断 === 总共处理了${totalDataBlocks}个数据块，${totalChars}个字符`);
+                        document.getElementById('simpleStreamResponse').classList.remove('streaming');
+                        showResponse('simpleStreamResponse', `流式读取错误: ${error.message}`, true);
+                    });
+                }
+                
+                function processSimpleSSELines(text) {
+                    if (!text) {
+                        return;
+                    }
+                    
+                    // 简化SSE解析：直接处理每个data行，不等待空行
+                    // SSE格式：event: xxx\ndata: xxx\n\n 或 event: xxx\ndata: xxx\nevent: xxx\ndata: xxx
+                    const lines = text.split('\n');
+                    let currentEvent = 'message';
+                    let dataCount = 0;
+                    
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i];
+                        
+                        // 处理event行
+                        if (line.startsWith('event: ')) {
+                            currentEvent = line.substring(7).trim();
+                            continue;
+                        }
+                        
+                        // 处理data行 - 立即处理，不等待空行
+                        if (line.startsWith('data: ')) {
+                            const data = line.substring(6);
+                            dataCount++;
+                            totalDataBlocks++;
+                            
+                            if (currentEvent === 'complete' || data === '流式响应完成') {
+                                console.debug('收到complete事件');
+                                document.getElementById('simpleStreamResponse').classList.remove('streaming');
+                            } else if (currentEvent === 'error') {
+                                console.error('收到error事件:', data);
+                                document.getElementById('simpleStreamResponse').classList.remove('streaming');
+                                showResponse('simpleStreamResponse', `错误: ${data}`, true);
+                            } else if (currentEvent === 'message') {
+                                // 立即追加内容
+                                if (data !== undefined && data !== null) {
+                                    totalChars += data.length;
+                                    console.debug(`处理第${totalDataBlocks}个数据块，长度:`, data.length, '累计字符:', totalChars, '内容:', data.substring(0, Math.min(50, data.length)));
+                                    appendStreamContent('simpleStreamResponse', data);
+                                }
+                            }
+                        }
+                        // 忽略空行和其他行
+                    }
+                    
+                    if (dataCount > 0) {
+                        console.debug(`本次处理了${dataCount}个数据块`);
+                    }
+                }
+                
+                readStream();
+            }).catch(error => {
+                document.getElementById('simpleStreamResponse').classList.remove('streaming');
+                showResponse('simpleStreamResponse', `请求失败: ${error.message}`, true);
+            });
+        }
+        
+        // 测试流式对话
+        function testStreamChat() {
+            const messagesText = document.getElementById('streamMessages').value.trim();
+            if (!messagesText) {
+                showResponse('streamResponse', '请输入消息列表', true);
+                return;
+            }
+            
+            let messages;
+            try {
+                messages = JSON.parse(messagesText);
+            } catch (e) {
+                showResponse('streamResponse', 'JSON格式错误: ' + e.message, true);
+                return;
+            }
+            
+            const streamDelay = document.getElementById('streamDelay').value;
+            const temperature = document.getElementById('wsTemperature').value;
+            const maxTokens = document.getElementById('wsMaxTokens').value;
+            const thinking = document.getElementById('thinking').value;
+            
+            stopStream('streamResponse');
+            clearResponse('streamResponse');
+            
+            const params = new URLSearchParams();
+            if (streamDelay) params.append('streamDelay', streamDelay);
+            if (temperature) params.append('temperature', temperature);
+            if (maxTokens) params.append('maxTokens', maxTokens);
+            if (thinking) params.append('thinking', thinking);
+            
+            fetch(`${getBaseUrl()}/api/spark-ai/ws/chat/stream?${params.toString()}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'text/event-stream'
+                },
+                body: JSON.stringify(messages)
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status} ${response.statusText}`);
+                }
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                document.getElementById('streamResponse').classList.add('streaming');
+                
+                let buffer = '';
+                let totalDataBlocks = 0;
+                let totalChars = 0;
+                
+                function readStream() {
+                    reader.read().then(({ done, value }) => {
+                        if (done) {
+                            // 处理剩余的buffer
+                            if (buffer) {
+                                console.debug('处理最终buffer，长度:', buffer.length);
+                                processSSELines(buffer);
+                            }
+                            console.log(`=== 流式响应完成 === 总共处理了${totalDataBlocks}个数据块，${totalChars}个字符`);
+                            document.getElementById('streamResponse').classList.remove('streaming');
+                            return;
+                        }
+                        
+                        // 累积数据到buffer
+                        const decoded = decoder.decode(value, { stream: true });
+                        buffer += decoded;
+                        
+                        // 按行分割，保留最后一个不完整的行
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop() || ''; // 保留最后一个不完整的行
+                        
+                        // 处理完整的行
+                        const completeLines = lines.join('\n');
+                        if (completeLines) {
+                            console.debug('处理SSE数据块，长度:', completeLines.length, '预览:', completeLines.substring(0, Math.min(100, completeLines.length)));
+                            processSSELines(completeLines);
+                        }
+                        
+                        readStream();
+                    }).catch(error => {
+                        console.error('流式读取错误:', error);
+                        console.log(`=== 流式响应中断 === 总共处理了${totalDataBlocks}个数据块，${totalChars}个字符`);
+                        document.getElementById('streamResponse').classList.remove('streaming');
+                        showResponse('streamResponse', `流式读取错误: ${error.message}`, true);
+                    });
+                }
+                
+                function processSSELines(text) {
+                    if (!text) {
+                        return;
+                    }
+                    
+                    // 简化SSE解析：直接处理每个data行，不等待空行
+                    // SSE格式：event: xxx\ndata: xxx\n\n 或 event: xxx\ndata: xxx\nevent: xxx\ndata: xxx
+                    const lines = text.split('\n');
+                    let currentEvent = 'message';
+                    let dataCount = 0;
+                    
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i];
+                        
+                        // 处理event行
+                        if (line.startsWith('event: ')) {
+                            currentEvent = line.substring(7).trim();
+                            continue;
+                        }
+                        
+                        // 处理data行 - 立即处理，不等待空行
+                        if (line.startsWith('data: ')) {
+                            const data = line.substring(6);
+                            dataCount++;
+                            totalDataBlocks++;
+                            
+                            if (currentEvent === 'complete' || data === '流式响应完成') {
+                                console.debug('收到complete事件');
+                                document.getElementById('streamResponse').classList.remove('streaming');
+                            } else if (currentEvent === 'error') {
+                                console.error('收到error事件:', data);
+                                document.getElementById('streamResponse').classList.remove('streaming');
+                                showResponse('streamResponse', `错误: ${data}`, true);
+                            } else if (currentEvent === 'message') {
+                                // 立即追加内容
+                                if (data !== undefined && data !== null) {
+                                    totalChars += data.length;
+                                    console.debug(`处理第${totalDataBlocks}个数据块，长度:`, data.length, '累计字符:', totalChars, '内容:', data.substring(0, Math.min(50, data.length)));
+                                    appendStreamContent('streamResponse', data);
+                                }
+                            }
+                        }
+                        // 忽略空行和其他行
+                    }
+                    
+                    if (dataCount > 0) {
+                        console.debug(`本次处理了${dataCount}个数据块`);
+                    }
+                }
+                
+                readStream();
+            }).catch(error => {
+                showResponse('streamResponse', `请求失败: ${error.message}`, true);
+            });
+        }
+        
+        // 测试WebSocket非流式
+        async function testWebSocketChat() {
+            const messagesText = document.getElementById('wsMessages').value.trim();
+            if (!messagesText) {
+                showResponse('wsResponse', '请输入消息列表', true);
+                return;
+            }
+            
+            let messages;
+            try {
+                messages = JSON.parse(messagesText);
+            } catch (e) {
+                showResponse('wsResponse', 'JSON格式错误: ' + e.message, true);
+                return;
+            }
+            
+            const temperature = document.getElementById('wsTemperature').value;
+            const maxTokens = document.getElementById('wsMaxTokens').value;
+            const thinking = document.getElementById('thinking').value;
+            
+            showResponse('wsResponse', '<div class="loading"></div>正在发送请求...');
+            
+            try {
+                const params = new URLSearchParams();
+                if (temperature) params.append('temperature', temperature);
+                if (maxTokens) params.append('maxTokens', maxTokens);
+                if (thinking) params.append('thinking', thinking);
+                
+                const response = await fetch(`${getBaseUrl()}/api/spark-ai/ws/chat?${params.toString()}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(messages)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                if (data.code === 0 || data.code === 200) {
+                    const responseData = data.data || data.date;
+                    let content = '';
+                    if (responseData) {
+                        if (responseData.payload && responseData.payload.choices && responseData.payload.choices.text) {
+                            const textArray = responseData.payload.choices.text;
+                            if (Array.isArray(textArray) && textArray.length > 0) {
+                                content = textArray[0].content || '';
+                            }
+                        } else if (typeof responseData === 'string') {
+                            content = responseData;
+                        }
+                    }
+                    const meta = responseData && typeof responseData === 'object' && responseData.header ? 
+                        `<div class="response-meta">会话ID: ${responseData.header.sid || 'N/A'}</div>` : '';
+                    showResponse('wsResponse', `<div class="response-content">${escapeHtml(content)}</div>${meta}`);
+                } else {
+                    showResponse('wsResponse', `错误: ${data.message || '未知错误'}`, true);
+                }
+            } catch (error) {
+                showResponse('wsResponse', `请求失败: ${error.message}`, true);
+            }
+        }
+        
+        // 保存配置
+        function saveConfig() {
+            const apiUrl = document.getElementById('configApiUrl').value;
+            document.getElementById('apiBaseUrl').value = apiUrl;
+            localStorage.setItem('apiBaseUrl', apiUrl);
+            alert('配置已保存！');
+        }
+        
+        // 转义HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // 页面加载时恢复配置
+        window.onload = function() {
+            const savedUrl = localStorage.getItem('apiBaseUrl');
+            if (savedUrl) {
+                document.getElementById('apiBaseUrl').value = savedUrl;
+                document.getElementById('configApiUrl').value = savedUrl;
+            }
+        };
+    </script>
+</body>
+</html>

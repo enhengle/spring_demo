@@ -265,6 +265,7 @@ mvn spring-boot:run
 4. **访问接口**
 - 应用地址：http://localhost:1234
 - Swagger文档：http://localhost:1234/swagger-ui.html
+- AI测试页面：http://localhost:1234/spark-ai-test.html
 - 测试接口：http://localhost:1234/test/get_port
 
 ## 注意事项
