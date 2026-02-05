@@ -99,6 +99,20 @@
             <artifactId>easyexcel</artifactId>
             <version>3.3.2</version>
         </dependency>
+        
+        <!-- Apache Commons Net - FTP 文件传输 -->
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>3.9.0</version>
+        </dependency>
+        
+        <!-- JSch - SFTP/SSH 文件传输 -->
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.55</version>
+        </dependency>
 
         <!-- Apache Jena - RDF 操作 (使用 3.x 版本以兼容 Java 8) -->
         <dependency>
