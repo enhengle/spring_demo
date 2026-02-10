@@ -1,285 +1,441 @@
-# Spring Boot Demo 项目
+# Spring Demo 项目
 
-## 项目简介
+一个基于 Spring Boot 的演示项目，集成了多种 AI 服务和工作流功能。
 
-这是一个规范的Spring Boot项目，包含了企业级应用开发所需的基础功能和最佳实践。
+## 📋 项目简介
 
-## 项目结构
+本项目是一个 Spring Boot 演示项目，主要功能包括：
+
+- **Coze SQL识别工作流**：将自然语言转换为 SQL 语句
+- **Dify AI助手**：集成 Dify AI 对话功能（支持阻塞和流式模式）
+- **用户管理**：基础的 CRUD 功能
+- **操作日志**：AOP 切面记录操作日志
+- **优雅停机**：支持优雅停机功能
+
+## 🚀 技术栈
+
+- **框架**：Spring Boot 2.6.3
+- **Java版本**：1.8
+- **数据库**：MySQL
+- **ORM**：MyBatis-Plus 3.5.3
+- **API文档**：Swagger/OpenAPI 2.2.0
+- **配置中心**：Apollo（可选）
+- **工具库**：Lombok、Jackson
+
+## 📁 项目结构
 
 ```
 src/main/java/com/practise/demo/
-├── common/                    # 公共层
-│   ├── annotation/           # 自定义注解
-│   │   └── OperationLog.java  # 操作日志注解
-│   ├── aspect/               # AOP切面
-│   │   └── OperationLogAspect.java  # 操作日志切面
-│   ├── config/               # 配置类
-│   │   ├── ApolloConfig.java         # Apollo配置（可选）
-│   │   ├── GracefulShutdownConfig.java  # 优雅停机配置
-│   │   ├── GracefulShutdownListener.java # 优雅停机监听器
-│   │   ├── MyBatisPlusConfig.java    # MyBatis-Plus配置
-│   │   └── SwaggerConfig.java        # Swagger配置
-│   └── constant/             # 常量类
-│       └── ErrorCode.java    # 错误码统一管理
-├── controller/               # 接口层（Controller）
-│   └── TestController.java
-├── service/                  # 业务层（Service）
-│   └── TestService.java
-├── mapper/                   # 数据访问层（Mapper）
-│   └── UserMapper.java
-├── model/                    # 数据模型层
-│   └── entity/               # 实体类
-│       ├── BaseEntity.java   # 基础实体类
-│       └── User.java         # 用户实体（示例）
-├── myExceptionHandler/       # 异常处理
-│   ├── ServerException.java
-│   └── ServerExceptionHandler.java
-├── response/                 # 响应类
-│   ├── EnumCode.java
-│   └── Response.java
-└── util/                     # 工具类
-    └── DateUtil.java
+├── config/              # 配置类
+│   ├── CozeConfig.java          # Coze配置
+│   ├── RestTemplateConfig.java  # RestTemplate配置
+│   ├── SwaggerConfig.java       # Swagger配置
+│   └── ...
+├── controller/          # 控制器层
+│   ├── CozeController.java     # Coze工作流控制器
+│   ├── UserController.java      # 用户控制器
+│   └── ...
+├── service/            # 服务层
+│   ├── CozeService.java         # Coze服务接口
+│   ├── impl/
+│   │   └── CozeServiceImpl.java # Coze服务实现
+│   └── ...
+├── model/              # 数据模型
+│   ├── dto/                    # 数据传输对象
+│   │   ├── CozeWorkflowRequestDTO.java
+│   │   └── CozeWorkflowResponseDTO.java
+│   └── entity/                 # 实体类
+├── exception/          # 异常处理
+├── common/             # 公共类
+└── util/               # 工具类
+
+src/main/resources/
+├── application.yml     # 配置文件
+└── static/            # 静态资源
+    └── coze-test.html # Coze测试页面
 ```
 
-## 功能特性
+## ⚙️ 配置说明
 
-### 1. 规范的工程结构
-- ✅ **接口层（Controller）**：处理HTTP请求
-- ✅ **业务层（Service）**：业务逻辑处理
-- ✅ **数据访问层（Mapper）**：数据库操作
-- ✅ **数据模型层（Model/Entity）**：数据实体
-- ✅ **公共层（Common）**：公共组件、工具类、常量等
+### 1. 数据库配置
 
-### 2. 多环境配置
-项目支持多环境配置，通过`spring.profiles.active`指定环境：
-- `dev`：开发环境（application-dev.yml）
-- `test`：测试环境（application-test.yml）
-- `prod`：生产环境（application-prod.yml）
+在 `application.yml` 中配置数据库连接：
 
-**使用方式：**
-```bash
-# 通过环境变量
-export SPRING_PROFILES_ACTIVE=prod
-
-# 通过启动参数
-java -jar demo.jar --spring.profiles.active=prod
-
-# 在K8s中通过环境变量配置
-env:
-  - name: SPRING_PROFILES_ACTIVE
-    value: "prod"
+```yaml
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/demo?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
 ```
 
-### 3. 配置中心兼容
-项目兼容多种配置方式：
-- **Apollo配置中心**：当`apollo.bootstrap.enabled=true`时启用
-- **Application配置文件**：默认使用application.yml
-- **环境变量**：支持通过环境变量覆盖配置
-- **默认配置**：提供默认值，确保项目可正常运行
+### 2. Coze配置
 
-**配置优先级：** Apollo配置 > 环境变量 > application.yml > 默认值
+配置 Coze SQL识别工作流：
 
-### 4. 接口文档（Swagger/OpenAPI）
-项目集成了Swagger 3（OpenAPI 3），自动生成接口文档。
-
-**访问地址：**
-- Swagger UI: http://localhost:1234/swagger-ui.html
-- API Docs: http://localhost:1234/v3/api-docs
-
-**使用示例：**
-```java
-@Tag(name = "用户接口", description = "用户相关接口")
-@RestController
-@RequestMapping("/user")
-public class UserController {
-    
-    @Operation(summary = "获取用户", description = "根据ID获取用户信息")
-    @GetMapping("/{id}")
-    public Response<User> getUser(@PathVariable Long id) {
-        // ...
-    }
-}
+```yaml
+coze:
+  workflow-url: ${COZE_WORKFLOW_URL:https://8xdkxnw4qj.coze.site/run}
+  token: ${COZE_TOKEN:your-token-here}
+  connect-timeout: ${COZE_CONNECT_TIMEOUT:10000}
+  read-timeout: ${COZE_READ_TIMEOUT:60000}
+  sse-timeout: ${COZE_SSE_TIMEOUT:300000}
 ```
 
-### 5. MyBatis-Plus数据访问层
-项目使用MyBatis-Plus作为ORM框架，提供了：
-- 自动填充（创建时间、更新时间）
-- 逻辑删除
-- 分页插件
-- 基础CRUD操作
+**获取Token**：
+1. 访问 [Coze平台](https://www.coze.cn)
+2. 创建工作流并获取访问Token
+3. 将Token配置到 `application.yml` 或环境变量中
 
-**使用示例：**
-```java
-@Mapper
-public interface UserMapper extends BaseMapper<User> {
-    // 继承BaseMapper即可使用基础CRUD方法
-}
+### 3. Dify配置（可选）
 
-@Service
-public class UserService {
-    @Autowired
-    private UserMapper userMapper;
-    
-    public User getUserById(Long id) {
-        return userMapper.selectById(id);
-    }
-}
+如果需要使用 Dify AI 功能：
+
+```yaml
+dify:
+  base-url: ${DIFY_BASE_URL:https://api.dify.ai/v1}
+  api-key: ${DIFY_API_KEY:your-api-key}
+  app-id: ${DIFY_APP_ID:your-app-id}
+  connect-timeout: ${DIFY_CONNECT_TIMEOUT:10000}
+  read-timeout: ${DIFY_READ_TIMEOUT:60000}
+  sse-timeout: ${DIFY_SSE_TIMEOUT:300000}
 ```
 
-### 6. 操作审计（AOP实现）
-通过AOP实现操作日志记录，自动记录接口调用信息。
+### 4. 服务器配置
 
-**使用方式：**
-```java
-@OperationLog(value = "创建用户", type = "新增", recordParams = true, recordResult = false)
-@PostMapping("/user")
-public Response<User> createUser(@RequestBody User user) {
-    // ...
-}
-```
-
-**记录内容：**
-- 操作类型、操作描述
-- 请求IP、URL、请求方式
-- 请求参数、返回结果（可选）
-- 执行耗时
-- 异常信息（如有）
-
-### 7. 错误码统一管理
-所有错误码统一在`ErrorCode`类中管理，便于维护和扩展。
-
-**使用示例：**
-```java
-// 成功响应
-return Response.ok(data);
-
-// 错误响应
-return Response.error(ErrorCode.PARAM_ERROR);
-return Response.error(ErrorCode.DATA_NOT_FOUND, "用户不存在");
-```
-
-**错误码分类：**
-- `1000-1999`：系统错误码
-- `2000-2999`：业务错误码
-- `3000-3999`：权限错误码
-
-### 8. 优雅停机
-项目实现了优雅停机功能，确保：
-- 停止接收新请求
-- 等待正在处理的请求完成
-- 关闭线程池和连接
-- 避免数据丢失和任务中断
-
-**配置说明：**
 ```yaml
 server:
-  shutdown: graceful  # 启用优雅停机
-spring:
-  lifecycle:
-    timeout-per-shutdown-phase: 30s  # 等待时间
+  port: ${SERVER_PORT:1234}
+  shutdown: graceful  # 优雅停机
 ```
 
-**工作原理：**
-1. 接收到停机信号（SIGTERM）后，停止接收新请求
-2. 等待正在处理的请求完成（最多30秒）
-3. 关闭自定义线程池
-4. 关闭应用上下文
+## 🎯 功能说明
 
-## 打包部署
+### 1. Coze SQL识别工作流
 
-### 打包成JAR
-```bash
-mvn clean package
+将自然语言转换为 SQL 语句。
+
+#### API接口
+
+**阻塞模式**：
+```http
+POST /api/coze/workflow
+Content-Type: application/json
+
+{
+  "input": "查询所有用户信息",
+  "responseMode": "blocking"
+}
 ```
 
-生成的JAR文件位于：`target/demo-0.0.1-SNAPSHOT.jar`
+**流式模式**：
+```http
+POST /api/coze/workflow
+Content-Type: application/json
 
-### K8s部署
-项目已配置为可打包成JAR包，适合在K8s容器中运行。
-
-**Dockerfile示例：**
-```dockerfile
-FROM openjdk:8-jre-alpine
-COPY target/demo-0.0.1-SNAPSHOT.jar app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+{
+  "input": "查询所有用户信息",
+  "responseMode": "streaming"
+}
 ```
 
-**K8s Deployment示例：**
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: spring-demo
-spec:
-  replicas: 2
-  template:
-    spec:
-      containers:
-      - name: app
-        image: spring-demo:latest
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          value: "prod"
-        - name: DB_URL
-          valueFrom:
-            secretKeyRef:
-              name: db-secret
-              key: url
-        - name: DB_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: db-secret
-              key: username
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db-secret
-              key: password
-        lifecycle:
-          preStop:
-            exec:
-              command: ["/bin/sh", "-c", "sleep 10"]  # 给优雅停机留出时间
+#### 响应格式
+
+```json
+{
+  "code": 0,
+  "message": "操作成功",
+  "data": {
+    "result": "SELECT * FROM users",
+    "sql": "SELECT * FROM users",
+    "taskId": "task-123456",
+    "status": "success"
+  }
+}
 ```
 
-## 环境要求
+#### 测试页面
+
+访问：`http://localhost:1234/coze-test.html`
+
+功能特性：
+- ✅ 支持阻塞模式和流式模式
+- ✅ SQL代码高亮显示
+- ✅ 实时显示识别结果
+- ✅ 显示任务ID和执行状态
+
+### 2. Dify AI助手（可选）
+
+AI对话功能，支持阻塞和流式两种模式。
+
+#### API接口
+
+**阻塞模式**：
+```http
+POST /api/dify/chat
+Content-Type: application/json
+
+{
+  "message": "你好",
+  "responseMode": "blocking",
+  "conversationId": "可选"
+}
+```
+
+**流式模式**：
+```http
+POST /api/dify/chat
+Content-Type: application/json
+
+{
+  "message": "你好",
+  "responseMode": "streaming",
+  "conversationId": "可选"
+}
+```
+
+### 3. 用户管理
+
+基础的用户 CRUD 功能。
+
+#### API接口
+
+- `GET /api/user/list` - 获取用户列表
+- `GET /api/user/{id}` - 获取用户详情
+- `POST /api/user` - 创建用户
+- `PUT /api/user` - 更新用户
+- `DELETE /api/user/{id}` - 删除用户
+
+## 🛠️ 快速开始
+
+### 1. 环境要求
+
 - JDK 1.8+
 - Maven 3.6+
-- MySQL 5.7+（或MySQL 8.0+）
+- MySQL 5.7+
 
-## 快速开始
+### 2. 克隆项目
 
-1. **克隆项目**
 ```bash
 git clone <repository-url>
 cd spring-demo
 ```
 
-2. **配置数据库**
-修改`application-dev.yml`中的数据库连接信息
+### 3. 配置数据库
 
-3. **运行项目**
-```bash
-mvn spring-boot:run
+创建数据库：
+```sql
+CREATE DATABASE demo CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-4. **访问接口**
-- 应用地址：http://localhost:1234
-- Swagger文档：http://localhost:1234/swagger-ui.html
-- 测试接口：http://localhost:1234/test/get_port
+### 4. 配置应用
 
-## 注意事项
+编辑 `src/main/resources/application.yml`，配置数据库连接和 Coze Token。
 
-1. **Apollo配置**：如果使用Apollo配置中心，需要：
-   - 在`application.yml`中启用Apollo配置
-   - 配置Apollo Meta地址
-   - 确保网络可达Apollo服务器
+### 5. 编译运行
 
-2. **优雅停机**：在K8s中部署时，建议配置`preStop`钩子，给应用留出优雅停机的时间。
+```bash
+# 编译项目
+mvn clean package
 
-3. **日志配置**：日志文件默认保存在`./logs`目录，可通过`common.logDir`配置修改。
+# 运行项目
+mvn spring-boot:run
 
-4. **生产环境**：生产环境建议关闭Swagger UI，已在`application-prod.yml`中配置。
+# 或使用jar包运行
+java -jar target/demo-0.0.1-SNAPSHOT.jar
+```
 
-## 许可证
+### 6. 访问应用
 
-Apache 2.0
+- **应用地址**：http://localhost:1234
+- **Swagger文档**：http://localhost:1234/swagger-ui.html
+- **Coze测试页面**：http://localhost:1234/coze-test.html
+
+## 📚 API文档
+
+### Swagger UI
+
+启动应用后，访问：`http://localhost:1234/swagger-ui.html`
+
+### 主要接口
+
+#### Coze工作流
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | `/api/coze/workflow` | 执行SQL识别工作流 |
+
+#### Dify AI（可选）
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | `/api/dify/chat` | 发送AI对话消息 |
+
+#### 用户管理
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/user/list` | 获取用户列表 |
+| GET | `/api/user/{id}` | 获取用户详情 |
+| POST | `/api/user` | 创建用户 |
+| PUT | `/api/user` | 更新用户 |
+| DELETE | `/api/user/{id}` | 删除用户 |
+
+## 🔍 代码检查
+
+### 编译状态
+
+- ✅ **编译错误**：0个
+- ⚠️ **警告**：9个（不影响功能）
+
+### 警告说明
+
+1. **GlobalExceptionHandler**：Response泛型未指定（5个警告）
+   - 建议：使用 `Response<?>` 或具体类型
+
+2. **GracefulShutdownConfig**：未使用的logger字段
+   - 影响：无
+
+3. **OperationLogAspect**：未使用的exception变量
+   - 影响：无
+
+4. **GracefulShutdownListener**：未使用的shutdownExecutor方法
+   - 影响：无（可能是预留方法）
+
+5. **pom.xml**：项目配置需要更新
+   - 建议：运行 `mvn clean install` 更新配置
+
+## 🧪 测试
+
+### 单元测试
+
+```bash
+mvn test
+```
+
+### 集成测试
+
+使用 Postman 或 Swagger UI 测试API接口。
+
+### 前端测试页面
+
+1. **Coze测试页面**：`http://localhost:1234/coze-test.html`
+   - 测试SQL识别功能
+   - 支持阻塞和流式两种模式
+
+2. **Dify测试页面**（如果已实现）：`http://localhost:1234/dify-test.html`
+   - 测试AI对话功能
+
+## 📝 使用示例
+
+### Coze SQL识别示例
+
+**请求**：
+```bash
+curl -X POST http://localhost:1234/api/coze/workflow \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": "查询所有用户信息",
+    "responseMode": "blocking"
+  }'
+```
+
+**响应**：
+```json
+{
+  "code": 0,
+  "message": "操作成功",
+  "data": {
+    "result": "SELECT * FROM users",
+    "sql": "SELECT * FROM users",
+    "taskId": "task-123456",
+    "status": "success"
+  }
+}
+```
+
+### 流式模式示例
+
+使用前端测试页面或支持SSE的客户端：
+
+```javascript
+fetch('/api/coze/workflow', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    input: '查询所有用户信息',
+    responseMode: 'streaming'
+  })
+})
+.then(response => {
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  
+  function readStream() {
+    reader.read().then(({ done, value }) => {
+      if (done) return;
+      
+      const chunk = decoder.decode(value);
+      console.log('收到数据:', chunk);
+      
+      readStream();
+    });
+  }
+  
+  readStream();
+});
+```
+
+## 🐛 故障排查
+
+### 问题1：Coze API调用失败
+
+**错误信息**：`Coze API认证失败（401）`
+
+**解决方案**：
+1. 检查 `application.yml` 中的 `coze.token` 配置
+2. 确认Token是否有效
+3. 检查Token格式是否正确
+
+### 问题2：数据库连接失败
+
+**错误信息**：`Cannot connect to database`
+
+**解决方案**：
+1. 检查数据库服务是否启动
+2. 检查 `application.yml` 中的数据库配置
+3. 确认数据库用户权限
+
+### 问题3：端口被占用
+
+**错误信息**：`Port 1234 is already in use`
+
+**解决方案**：
+1. 修改 `application.yml` 中的 `server.port`
+2. 或停止占用端口的进程
+
+## 📖 参考文档
+
+- [Spring Boot官方文档](https://spring.io/projects/spring-boot)
+- [MyBatis-Plus文档](https://baomidou.com/)
+- [Coze API文档](https://docs.coze.cn/developer_guides/coze_api_overview)
+- [Dify API文档](https://docs.dify.ai)
+
+## 📄 许可证
+
+本项目仅供学习和演示使用。
+
+## 👥 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+## 📞 联系方式
+
+如有问题，请提交 Issue 或联系项目维护者。
+
+---
+
+**最后更新**：2024年

@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coze SQL识别工作流测试页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .config-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .config-section h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .workflow-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .workflow-box {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+        
+        .workflow-box h3 {
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            margin: 0;
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .workflow-result {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: #fafafa;
+        }
+        
+        .result-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .result-item h4 {
+            font-size: 14px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .result-item pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .result-item .sql-code {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        #streamingContent {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 50px;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        #streamingContent.sql-code {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .workflow-input {
+            padding: 15px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .workflow-input textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .workflow-input .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .workflow-input button {
+            flex: 1;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .workflow-input button:hover:not(:disabled) {
+            background: #5568d3;
+        }
+        
+        .workflow-input button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: #5a6268;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #667eea;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .task-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .info-boxes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .info-box {
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+        
+        .info-box h5 {
+            font-size: 13px;
+            color: #667eea;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+        
+        .info-box .info-content {
+            font-size: 14px;
+            color: #333;
+            word-wrap: break-word;
+        }
+        
+        .info-box.valid {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .info-box.invalid {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        .info-box .keyword-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 3px;
+            background: #667eea;
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Coze SQL识别工作流测试页面</h1>
+            <p>支持阻塞模式和流式模式识别SQL语句</p>
+        </div>
+        
+        <div class="content">
+            <div class="config-section">
+                <h2>⚙️ 配置信息</h2>
+                <div class="form-group">
+                    <label>API地址：</label>
+                    <input type="text" id="apiUrl" value="/api/coze/workflow" readonly>
+                </div>
+                <div class="form-group">
+                    <label>响应模式：</label>
+                    <select id="responseMode">
+                        <option value="blocking">阻塞模式（一次性返回）</option>
+                        <option value="streaming">流式模式（实时返回）</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="workflow-section">
+                <div class="workflow-box">
+                    <h3>💬 阻塞模式SQL识别</h3>
+                    <div id="blockingStatus" class="status info" style="display: none;"></div>
+                    <div class="workflow-result" id="blockingResult"></div>
+                    <div class="workflow-input">
+                        <textarea id="blockingInput" placeholder="输入自然语言，例如：查询所有用户信息..."></textarea>
+                        <div class="button-group">
+                            <button onclick="executeBlockingWorkflow()" id="blockingBtn">执行识别</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="workflow-box">
+                    <h3>🌊 流式模式SQL识别</h3>
+                    <div id="streamingStatus" class="status info" style="display: none;"></div>
+                    <div class="workflow-result" id="streamingResult"></div>
+                    <div class="workflow-input">
+                        <textarea id="streamingInput" placeholder="输入自然语言，例如：查询所有用户信息..."></textarea>
+                        <div class="button-group">
+                            <button onclick="executeStreamingWorkflow()" id="streamingBtn">执行识别</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="clearBlockingResult()">清空阻塞模式结果</button>
+                <button class="btn btn-secondary" onclick="clearStreamingResult()">清空流式模式结果</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 阻塞模式执行工作流
+        async function executeBlockingWorkflow() {
+            const input = document.getElementById('blockingInput');
+            const btn = document.getElementById('blockingBtn');
+            const resultDiv = document.getElementById('blockingResult');
+            const statusDiv = document.getElementById('blockingStatus');
+            
+            const inputText = input.value.trim();
+            if (!inputText) {
+                alert('请输入要识别的自然语言');
+                return;
+            }
+            
+            btn.disabled = true;
+            showStatus(statusDiv, 'info', '<span class="loading"></span>正在识别SQL...');
+            
+            try {
+                const requestBody = {
+                    input: inputText,
+                    responseMode: 'blocking'
+                };
+                
+                const response = await fetch('/api/coze/workflow', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('后端返回数据:', result);
+                
+                if (result.code === 0 && result.data) {
+                    const data = result.data;
+                    console.log('解析后的数据:', data);
+                    displayResult(resultDiv, data, 'blocking');
+                    showStatus(statusDiv, 'success', 'SQL识别成功');
+                } else {
+                    console.error('响应格式错误:', result);
+                    throw new Error(result.message || '请求失败');
+                }
+            } catch (error) {
+                console.error('执行工作流失败:', error);
+                console.error('错误详情:', error);
+                showError(resultDiv, error.message || '未知错误');
+                showStatus(statusDiv, 'error', '识别失败: ' + (error.message || '未知错误'));
+            } finally {
+                btn.disabled = false;
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        // 流式模式执行工作流
+        function executeStreamingWorkflow() {
+            const input = document.getElementById('streamingInput');
+            const btn = document.getElementById('streamingBtn');
+            const resultDiv = document.getElementById('streamingResult');
+            const statusDiv = document.getElementById('streamingStatus');
+            
+            const inputText = input.value.trim();
+            if (!inputText) {
+                alert('请输入要识别的自然语言');
+                return;
+            }
+            
+            btn.disabled = true;
+            showStatus(statusDiv, 'info', '<span class="loading"></span>正在建立流式连接...');
+            resultDiv.innerHTML = '';
+            
+            const requestBody = {
+                input: inputText,
+                responseMode: 'streaming'
+            };
+            
+            let fullResult = '';
+            let taskId = null;
+            let finalData = null;
+            
+            fetch('/api/coze/workflow', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                if (!response.body) {
+                    throw new Error('响应体为空');
+                }
+                
+                showStatus(statusDiv, 'info', '<span class="loading"></span>正在接收流式数据...');
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                
+                function readStream() {
+                    reader.read().then(({ done, value }) => {
+                        if (done) {
+                            // 流结束，显示完整结果（包括4个信息框）
+                            if (finalData) {
+                                displayResult(resultDiv, finalData, 'streaming');
+                            } else if (fullResult) {
+                                // 如果没有完整数据，构建一个基本的数据对象
+                                const data = {
+                                    sql: fullResult,
+                                    result: fullResult,
+                                    taskId: taskId,
+                                    isValid: true
+                                };
+                                displayResult(resultDiv, data, 'streaming');
+                            } else {
+                                showError(resultDiv, '未识别到SQL语句');
+                            }
+                            
+                            showStatus(statusDiv, 'success', '流式识别完成');
+                            btn.disabled = false;
+                            setTimeout(() => {
+                                statusDiv.style.display = 'none';
+                            }, 3000);
+                            return;
+                        }
+                        
+                        // 解码数据
+                        buffer += decoder.decode(value, { stream: true });
+                        
+                        // 处理SSE格式的数据
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop() || '';
+                        
+                        for (const line of lines) {
+                            const trimmedLine = line.trim();
+                            if (!trimmedLine) continue;
+                            
+                            if (trimmedLine.startsWith('data: ')) {
+                                const data = trimmedLine.substring(6).trim();
+                                
+                                if (data === '[DONE]' || data === '') {
+                                    continue;
+                                }
+                                
+                                try {
+                                    const eventData = JSON.parse(data);
+                                    
+                                    // 处理 analysis_result 格式（新格式）
+                                    if (eventData.analysis_result) {
+                                        // 保存完整数据用于最终显示
+                                        finalData = {
+                                            analysis_result: eventData.analysis_result,
+                                            run_id: eventData.run_id || eventData.taskId
+                                        };
+                                        
+                                        if (eventData.taskId || eventData.run_id) {
+                                            taskId = eventData.taskId || eventData.run_id;
+                                        }
+                                        
+                                        // 立即显示完整结果（包括4个信息框）
+                                        resultDiv.innerHTML = '';
+                                        displayResult(resultDiv, finalData, 'streaming');
+                                        
+                                        showStatus(statusDiv, 'success', '流式识别完成');
+                                        btn.disabled = false;
+                                        setTimeout(() => {
+                                            statusDiv.style.display = 'none';
+                                        }, 3000);
+                                        return;
+                                    }
+                                    // 处理消息片段
+                                    else if (eventData.chunk) {
+                                        fullResult += eventData.chunk;
+                                        
+                                        // 实时显示SQL（临时显示）
+                                        if (!resultDiv.querySelector('.result-item')) {
+                                            const tempItem = document.createElement('div');
+                                            tempItem.className = 'result-item';
+                                            tempItem.innerHTML = '<h4>识别结果（实时）</h4><pre class="sql-code" id="streamingContent">' + escapeHtml(fullResult) + '</pre>';
+                                            resultDiv.appendChild(tempItem);
+                                        } else {
+                                            const contentDiv = document.getElementById('streamingContent');
+                                            if (contentDiv) {
+                                                contentDiv.textContent = fullResult;
+                                            }
+                                        }
+                                        
+                                        if (eventData.taskId) {
+                                            taskId = eventData.taskId;
+                                        }
+                                    }
+                                    // 处理完整响应
+                                    else if (eventData.result !== undefined || eventData.sql !== undefined || eventData.complete) {
+                                        // 保存完整数据用于最终显示
+                                        finalData = eventData;
+                                        if (eventData.sql) {
+                                            fullResult = eventData.sql;
+                                        } else if (eventData.result) {
+                                            fullResult = eventData.result;
+                                        }
+                                        
+                                        if (eventData.taskId) {
+                                            taskId = eventData.taskId;
+                                        }
+                                        
+                                        // 立即显示完整结果（包括4个信息框）
+                                        resultDiv.innerHTML = '';
+                                        displayResult(resultDiv, finalData, 'streaming');
+                                        
+                                        showStatus(statusDiv, 'success', '流式识别完成');
+                                        btn.disabled = false;
+                                        setTimeout(() => {
+                                            statusDiv.style.display = 'none';
+                                        }, 3000);
+                                        return;
+                                    }
+                                    // 处理错误
+                                    else if (eventData.error || eventData.message) {
+                                        throw new Error(eventData.message || eventData.error || '未知错误');
+                                    }
+                                } catch (e) {
+                                    if (data && data !== '[DONE]') {
+                                        console.warn('解析SSE数据失败:', data.substring(0, 100), e);
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // 继续读取
+                        readStream();
+                    }).catch(error => {
+                        console.error('读取流式数据失败:', error);
+                        if (contentDiv) {
+                            contentDiv.textContent = '错误: ' + error.message;
+                        }
+                        showStatus(statusDiv, 'error', '流式识别失败: ' + error.message);
+                        btn.disabled = false;
+                        setTimeout(() => {
+                            statusDiv.style.display = 'none';
+                        }, 3000);
+                    });
+                }
+                
+                readStream();
+            })
+            .catch(error => {
+                console.error('执行流式工作流失败:', error);
+                showError(resultDiv, error.message);
+                showStatus(statusDiv, 'error', '执行失败: ' + error.message);
+                btn.disabled = false;
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 3000);
+            });
+        }
+        
+        // 显示结果
+        function displayResult(container, data, mode) {
+            console.log('displayResult 接收到的数据:', data);
+            
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item';
+            
+            let html = '<h4>识别结果</h4>';
+            
+            // 处理 analysis_result 格式（新格式）
+            if (data.analysis_result) {
+                const analysis = data.analysis_result;
+                
+                // 设置SQL类型
+                if (analysis.syntax_type) {
+                    data.sqlType = analysis.syntax_type;
+                }
+                
+                // 设置关键字
+                if (analysis.keywords && Array.isArray(analysis.keywords)) {
+                    data.keywords = analysis.keywords.map(k => k.toUpperCase());
+                }
+                
+                // 设置是否正常
+                if (analysis.has_error !== undefined) {
+                    data.isValid = !analysis.has_error;
+                }
+                
+                // 设置错误信息
+                if (analysis.error_message) {
+                    data.error = analysis.error_message;
+                }
+                
+                // 设置任务ID
+                if (data.run_id) {
+                    data.taskId = data.run_id;
+                }
+            }
+            
+            // 获取SQL文本
+            let sqlText = data.sql || data.result || '';
+            if (!sqlText && data.data) {
+                if (typeof data.data === 'object' && data.data.sql) {
+                    sqlText = data.data.sql;
+                } else if (typeof data.data === 'string') {
+                    sqlText = data.data;
+                }
+            }
+            
+            // 显示SQL代码
+            if (sqlText && sqlText.trim()) {
+                html += '<h4 style="margin-top: 15px;">识别到的SQL：</h4>';
+                html += `<pre class="sql-code">${escapeHtml(sqlText)}</pre>`;
+            } else {
+                html += '<h4 style="margin-top: 15px; color: #dc3545;">未识别到SQL语句</h4>';
+            }
+            
+            // 显示4个信息框
+            html += '<div class="info-boxes">';
+            
+            // 1. SQL类型
+            html += '<div class="info-box">';
+            html += '<h5>SQL类型</h5>';
+            html += `<div class="info-content">${data.sqlType ? escapeHtml(data.sqlType) : '未知'}</div>`;
+            html += '</div>';
+            
+            // 2. 关键字
+            html += '<div class="info-box">';
+            html += '<h5>关键字</h5>';
+            if (data.keywords && data.keywords.length > 0) {
+                html += '<div class="info-content">';
+                data.keywords.forEach(keyword => {
+                    html += `<span class="keyword-tag">${escapeHtml(keyword)}</span>`;
+                });
+                html += '</div>';
+            } else {
+                html += '<div class="info-content">无</div>';
+            }
+            html += '</div>';
+            
+            // 3. 是否正常
+            html += '<div class="info-box ' + (data.isValid ? 'valid' : 'invalid') + '">';
+            html += '<h5>是否正常</h5>';
+            const isValidText = data.isValid === true ? '✓ 正常' : (data.isValid === false ? '✗ 异常' : '未知');
+            html += `<div class="info-content">${isValidText}</div>`;
+            html += '</div>';
+            
+            // 4. 错误信息
+            html += '<div class="info-box' + (data.error ? ' invalid' : '') + '">';
+            html += '<h5>错误信息</h5>';
+            html += `<div class="info-content">${data.error ? escapeHtml(data.error) : '无错误'}</div>`;
+            html += '</div>';
+            
+            html += '</div>';
+            
+            // 显示任务ID和状态
+            if (data.taskId) {
+                html += `<div class="task-info"><strong>任务ID:</strong> ${escapeHtml(data.taskId)}</div>`;
+            }
+            if (data.status) {
+                html += `<div class="task-info"><strong>状态:</strong> ${escapeHtml(data.status)}</div>`;
+            }
+            
+            resultItem.innerHTML = html;
+            container.appendChild(resultItem);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        // 显示错误
+        function showError(container, errorMsg) {
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item';
+            resultItem.innerHTML = `<h4>错误</h4><pre style="color: #dc3545;">${escapeHtml(errorMsg)}</pre>`;
+            container.appendChild(resultItem);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        // 显示任务信息
+        function showTaskInfo(container, taskId) {
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'task-info';
+            infoDiv.innerHTML = `<strong>任务ID:</strong> ${taskId}`;
+            container.appendChild(infoDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        // 显示状态
+        function showStatus(div, type, message) {
+            div.className = `status ${type}`;
+            div.innerHTML = message;
+            div.style.display = 'block';
+        }
+        
+        // 清空结果
+        function clearBlockingResult() {
+            document.getElementById('blockingResult').innerHTML = '';
+            document.getElementById('blockingInput').value = '';
+        }
+        
+        function clearStreamingResult() {
+            document.getElementById('streamingResult').innerHTML = '';
+            document.getElementById('streamingInput').value = '';
+        }
+        
+        // HTML转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
