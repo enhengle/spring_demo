@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.practise.demo.mapper.WorkTimeRecordMapper">
+    
+    <!-- 按日期范围和条件计算平均工时 -->
+    <select id="selectWorkTimeStatisticsByRange" resultMap="workTimeStatisticsMap">
+        SELECT 
+            COUNT(*) as total,
+            SUM(CASE WHEN is_workday = 1 THEN 1 ELSE 0 END) as workdayCount,
+            COALESCE(SUM(work_minutes), 0) as totalMinutes,
+            COALESCE(SUM(CASE WHEN is_workday = 1 THEN work_minutes ELSE 0 END), 0) as workdayMinutes
+        FROM work_time_record
+        WHERE deleted = 0 AND work_minutes IS NOT NULL
+        <if test="startDate != null">
+            AND work_date &gt;= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND work_date &lt;= #{endDate}
+        </if>
+        <if test="onlyWorkday != null and onlyWorkday == true">
+            AND is_workday = 1
+        </if>
+    </select>
+    
+    <resultMap id="workTimeStatisticsMap" type="com.practise.demo.mapper.WorkTimeRecordMapper$WorkTimeStatistics">
+        <result column="total" property="total" jdbcType="INTEGER"/>
+        <result column="workdayCount" property="workdayCount" jdbcType="INTEGER"/>
+        <result column="totalMinutes" property="totalMinutes" jdbcType="BIGINT"/>
+        <result column="workdayMinutes" property="workdayMinutes" jdbcType="BIGINT"/>
+    </resultMap>
+    
+</mapper>
